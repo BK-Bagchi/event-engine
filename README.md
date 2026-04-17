@@ -1,73 +1,106 @@
-# React + TypeScript + Vite
+# Event Engine
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+> An API-based backend platform that allows developers to send emails directly from frontend applications without building their own backend.
 
-Currently, two official plugins are available:
+## 📋 Table of Contents
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+- [Project Overview](#project-overview)
+- [How It Works](#how-it-works)
+- [Features](#features)
+- [Tech Stack](#tech-stack)
 
-## React Compiler
+## 🎯 Project Overview
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+**Event Engine** is a backend-as-a-service that converts frontend form submissions into automated email workflows without requiring developers to build their own backend.
 
-## Expanding the ESLint configuration
+### Core Purpose
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+To eliminate the need for a custom backend just for handling:
 
-```js
-export default defineConfig([
-  globalIgnores(["dist"]),
-  {
-    files: ["**/*.{ts,tsx}"],
-    extends: [
-      // Other configs...
+- contact forms
+- email sending
+- basic automation
 
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
+### Key Features
 
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ["./tsconfig.node.json", "./tsconfig.app.json"],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-]);
+- Send emails from frontend apps via API
+- Template-based email system
+- Secure backend relay (no exposed credentials)
+- Auto-reply to users
+- Submission storage (like a mini CRM)
+- Activity logs and email status tracking
+- Webhook support for integrations
+- Anti-spam protections (rate limit, captcha, origin control)
+
+### What Makes It Better Than EmailJS
+
+- Stores all submissions (not just sending emails)
+- Supports multi-action workflows (email + save + webhook)
+- Better tracking and analytics
+- More flexible template and service control
+
+### One-Line Summary
+
+Event Engine is a backend-as-a-service that converts frontend form submissions into automated email workflows without requiring developers to build their own backend.
+
+## 🔄 How It Works
+
+### Simple Flow
+
+1. **Create Project**: User creates a project in the dashboard to get API credentials
+2. **Connect Email Service**: Link an email provider (Gmail, SMTP, Outlook, etc.) securely
+3. **Build Templates**: Create email templates with dynamic variables (name, email, message, etc.)
+4. **Send via API**: Frontend app sends form data to Event Engine's POST endpoint
+5. **Process & Send**: Event Engine:
+   - Validates the API request
+   - Injects form data into the template
+   - Sends email via configured service
+   - Stores submission records and logs
+
+### Architecture Flow
+
+```
+Frontend App
+    ↓
+Event Engine API
+    ├─→ Validate Request
+    ├─→ Load Template
+    ├─→ Inject Variables
+    ├─→ Send Email (via Email Service)
+    ├─→ Store Submission
+    └─→ Log Activity
 ```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+## ✨ Features
 
-```js
-// eslint.config.js
-import reactX from "eslint-plugin-react-x";
-import reactDom from "eslint-plugin-react-dom";
+- **Express.js HTTP Server** with TypeScript support
+- **Automatic Server Restart** on file changes using nodemon
+- **Hot Reload** during development for faster iteration
+- **Environment-based Configuration** for flexible deployment
+- **Type Safety** with strict TypeScript checking
+- **MongoDB Integration** for data persistence
+- **Redis Caching** for improved performance
+- **JWT Authentication** for secure API access
+- **Email Service Integration** (nodemailer support)
+- **Project & User Management**
+- **Template Management** with structure customization
+- **Workflow Automation**
+- **Submission & Log Tracking**
+- **Rate Limiting** and security features
 
-export default defineConfig([
-  globalIgnores(["dist"]),
-  {
-    files: ["**/*.{ts,tsx}"],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs["recommended-typescript"],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ["./tsconfig.node.json", "./tsconfig.app.json"],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-]);
-```
+## 🛠 Tech Stack
+
+- **Runtime**: Node.js (v16+)
+- **Language**: TypeScript
+- **Framework**: Express.js
+- **Database**: MongoDB with Mongoose ODM
+- **Caching**: Redis (ioredis)
+- **Authentication**: JWT
+- **Email**: Nodemailer
+- **Dev Tools**: Nodemon for auto-restart
+- **Environment**: ESM modules with path aliases
+
+## 📄 License
+
+MIT
+optionally triggers auto-reply or workflows
