@@ -1,12 +1,11 @@
-import React from "react";
-import "./App.css";
+import { BrowserRouter } from "react-router-dom";
+import AppRouter from "@/router";
 
 const App = () => {
   return (
-    <div>
-      This is the Event Engine React App. You can start building your frontend
-      here.
-    </div>
+    <BrowserRouter>
+      <AppRouter />
+    </BrowserRouter>
   );
 };
 
