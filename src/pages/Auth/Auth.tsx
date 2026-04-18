@@ -1,4 +1,4 @@
-import banner from "@assets/event-engine-banner.png";
+import banner from "@/assets/event-engine-banner.png";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@components/ui/tabs";
 import Login from "./Login";
 import Register from "./Register";
