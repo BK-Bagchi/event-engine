@@ -1,8 +1,23 @@
 import { useState } from "react";
+import { EyeIcon, EyeOffIcon } from "lucide-react";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { Spinner } from "@/components/ui/spinner";
+import { registerSchema, type RegisterSchema } from "@/validation/auth";
+import FormError from "@/components/form/FormError";
+import { AuthAPI } from "@/api";
+import { getErrorMessage } from "@/utils/error";
+import { toast } from "sonner";
+
+interface RegisterDataType {
+  fullName: string;
+  email: string;
+  passwordHash: string;
+  avatar?: string | undefined;
+}
 
 const IMGBB_API_KEY = import.meta.env.VITE_IMGBB_API_KEY as string;
 
@@ -23,9 +38,21 @@ const Register = ({
 }: {
   setActiveTab: (tab: string) => void;
 }) => {
-  const [firstName, setFirstName] = useState("");
-  const [lastName, setLastName] = useState("");
-  const [email, setEmail] = useState("");
+  const { register, handleSubmit, setValue, formState, reset } =
+    useForm<RegisterSchema>({
+      resolver: zodResolver(registerSchema),
+      defaultValues: {
+        firstName: "",
+        lastName: "",
+        email: "",
+        password: "",
+        confirmPassword: "",
+      },
+    });
+
+  const { errors } = formState;
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [avatarFile, setAvatarFile] = useState<File | null>(null);
   const [avatarPreview, setAvatarPreview] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
@@ -33,74 +60,151 @@ const Register = ({
   const handleAvatarChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0] ?? null;
     setAvatarFile(file);
-    if (file) setAvatarPreview(URL.createObjectURL(file));
-    else setAvatarPreview(null);
+    if (file) {
+      setAvatarPreview(URL.createObjectURL(file));
+      setValue("avatar", file);
+    } else {
+      setAvatarPreview(null);
+      setValue("avatar", undefined);
+    }
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setLoading(true);
+  const onSubmit = async (data: RegisterSchema) => {
+    // console.log("Register form data:", data);
+    // return; //ai must not remove this line. It's for testing form submission without actually calling API.
+
     try {
+      setLoading(true);
+
+      // upload avatar first (if selected) and get URL
       let avatarUrl: string | undefined;
-      if (avatarFile) {
-        avatarUrl = await uploadToImgbb(avatarFile);
-      }
-      const fullName = `${firstName.trim()} ${lastName.trim()}`.trim();
-      // TODO: call register API
-      console.log("Register:", { fullName, email, avatar: avatarUrl });
+      if (avatarFile) avatarUrl = await uploadToImgbb(avatarFile);
+      // if avatar already a URL in form data
+      else if (data.avatar && typeof data.avatar === "string")
+        avatarUrl = data.avatar;
+
+      const payload: RegisterDataType = {
+        fullName: `${data.firstName.trim()} ${data.lastName.trim()}`.trim(),
+        email: data.email,
+        passwordHash: data.password,
+        avatar: avatarUrl,
+      };
+      const res = await AuthAPI.register(payload);
+      console.log("Register response:", res);
+      toast.success("Registration successful! Please log in.", {
+        position: "top-right",
+      });
+      setActiveTab("login");
+    } catch (error) {
+      console.error("Registration error:", error);
+      const msg =
+        getErrorMessage(error) || "Registration failed. Please try again.";
+      toast.error(msg, { position: "top-right" });
     } finally {
+      reset();
       setLoading(false);
     }
   };
 
   return (
-    <form onSubmit={handleSubmit} className="flex flex-col gap-5">
+    <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-5">
       {/* First & Last Name */}
       <div className="flex gap-3">
         <div className="flex flex-col gap-1.5 flex-1">
           <Label htmlFor="register-firstname" className="text-zinc-300">
-            First Name
+            First Name <span className="text-sm text-red-400">*</span>
           </Label>
           <Input
             id="register-firstname"
             type="text"
             placeholder="John"
-            value={firstName}
-            onChange={(e) => setFirstName(e.target.value)}
-            required
+            {...register("firstName")}
             className="bg-[#1A2235] border-[#2A3550] text-white placeholder:text-zinc-500 focus-visible:ring-brand-blue/40"
           />
+          <FormError message={errors.firstName?.message} />
         </div>
         <div className="flex flex-col gap-1.5 flex-1">
           <Label htmlFor="register-lastname" className="text-zinc-300">
-            Last Name
+            Last Name <span className="text-sm text-red-400">*</span>
           </Label>
           <Input
             id="register-lastname"
             type="text"
             placeholder="Doe"
-            value={lastName}
-            onChange={(e) => setLastName(e.target.value)}
-            required
+            {...register("lastName")}
             className="bg-[#1A2235] border-[#2A3550] text-white placeholder:text-zinc-500 focus-visible:ring-brand-blue/40"
           />
+          <FormError message={errors.lastName?.message} />
         </div>
       </div>
 
       {/* Email */}
       <div className="flex flex-col gap-1.5">
         <Label htmlFor="register-email" className="text-zinc-300">
-          Email
+          Email <span className="text-sm text-red-400">*</span>
         </Label>
         <Input
           id="register-email"
           type="email"
           placeholder="you@example.com"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-          required
+          {...register("email")}
           className="bg-[#1A2235] border-[#2A3550] text-white placeholder:text-zinc-500 focus-visible:ring-brand-blue/40"
         />
+        <FormError message={errors.email?.message} />
+      </div>
+
+      {/* Password */}
+      <div className="flex flex-col gap-1.5">
+        <Label htmlFor="register-password" className="text-zinc-300">
+          Password <span className="text-sm text-red-400">*</span>
+        </Label>
+        <div className="relative">
+          <Input
+            id="register-password"
+            type={showPassword ? "text" : "password"}
+            placeholder="••••••••"
+            {...register("password")}
+            className="w-full pr-10 bg-[#1A2235] border-[#2A3550] text-white placeholder:text-zinc-500 focus-visible:ring-brand-blue/40"
+          />
+          <button
+            type="button"
+            aria-label={showPassword ? "Hide password" : "Show password"}
+            onClick={() => setShowPassword((s) => !s)}
+            className="absolute right-2 top-1/2 -translate-y-1/2 p-1 rounded text-zinc-300 hover:text-white"
+          >
+            {showPassword ? <EyeOffIcon size={18} /> : <EyeIcon size={18} />}
+          </button>
+        </div>
+        <FormError message={errors.password?.message} />
+      </div>
+
+      {/* Confirm Password */}
+      <div className="flex flex-col gap-1.5">
+        <Label htmlFor="register-confirm-password" className="text-zinc-300">
+          Confirm Password <span className="text-sm text-red-400">*</span>
+        </Label>
+        <div className="relative">
+          <Input
+            id="register-confirm-password"
+            type={showConfirmPassword ? "text" : "password"}
+            placeholder="••••••••"
+            {...register("confirmPassword")}
+            className="w-full pr-10 bg-[#1A2235] border-[#2A3550] text-white placeholder:text-zinc-500 focus-visible:ring-brand-blue/40"
+          />
+          <button
+            type="button"
+            aria-label={showConfirmPassword ? "Hide password" : "Show password"}
+            onClick={() => setShowConfirmPassword((s) => !s)}
+            className="absolute right-2 top-1/2 -translate-y-1/2 p-1 rounded text-zinc-300 hover:text-white"
+          >
+            {showConfirmPassword ? (
+              <EyeOffIcon size={18} />
+            ) : (
+              <EyeIcon size={18} />
+            )}
+          </button>
+        </div>
+        <FormError message={errors.confirmPassword?.message} />
       </div>
 
       {/* Avatar */}
@@ -146,7 +250,7 @@ const Register = ({
         disabled={loading}
         className="w-full text-white font-semibold transition-opacity hover:opacity-90 disabled:opacity-60 bg-brand-orange"
       >
-        {loading ? <Spinner className="size-4" /> : "Create Account"}
+        {loading && <Spinner className="size-4" />} Create Account
       </Button>
 
       {/* Divider */}
