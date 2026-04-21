@@ -3,25 +3,53 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { Spinner } from "@/components/ui/spinner";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { loginSchema, type LoginSchema } from "@/validation/auth";
+import { AuthAPI } from "@/api";
+import { getErrorMessage } from "@/utils/error";
+import { toast } from "sonner";
+import FormError from "@/components/form/FormError";
+
+interface LoginDataType {
+  email: string;
+  passwordHash: string;
+}
 
 const Login = ({ setActiveTab }: { setActiveTab: (tab: string) => void }) => {
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+  } = useForm<LoginSchema>({ resolver: zodResolver(loginSchema) });
+
   const [loading, setLoading] = useState(false);
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const onSubmit = async (data: LoginSchema) => {
+    console.log("Login form data:", data);
+    // return; //ai must not remove this line. It's for testing form submission without actually calling API.
+
     setLoading(true);
     try {
-      // TODO: call login API
-      console.log("Login:", { email, password });
+      const payload: LoginDataType = {
+        email: data.email,
+        passwordHash: data.password,
+      };
+      const res = await AuthAPI.login(payload);
+      console.log("Login response:", res);
+      toast.success("Logged in successfully", { position: "top-right" });
+      // handle post-login actions (redirect, store token, etc.) elsewhere
+    } catch (error) {
+      console.error("Login error:", error);
+      const msg = getErrorMessage(error) || "Login failed. Please try again.";
+      toast.error(msg, { position: "top-right" });
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <form onSubmit={handleSubmit} className="flex flex-col gap-5">
+    <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-5">
       {/* Email */}
       <div className="flex flex-col gap-1.5">
         <Label htmlFor="login-email" className="text-zinc-300">
@@ -31,11 +59,10 @@ const Login = ({ setActiveTab }: { setActiveTab: (tab: string) => void }) => {
           id="login-email"
           type="email"
           placeholder="you@example.com"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-          required
+          {...register("email")}
           className="bg-[#1A2235] border-[#2A3550] text-white placeholder:text-zinc-500 focus-visible:ring-brand-blue/40"
         />
+        <FormError message={errors.email?.message} />
       </div>
 
       {/* Password */}
@@ -49,11 +76,10 @@ const Login = ({ setActiveTab }: { setActiveTab: (tab: string) => void }) => {
           id="login-password"
           type="password"
           placeholder="••••••••"
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-          required
+          {...register("password")}
           className="bg-[#1A2235] border-[#2A3550] text-white placeholder:text-zinc-500 focus-visible:ring-brand-blue/40"
         />
+        <FormError message={errors.password?.message} />
       </div>
 
       {/* Forgot Password */}
@@ -76,7 +102,7 @@ const Login = ({ setActiveTab }: { setActiveTab: (tab: string) => void }) => {
         disabled={loading}
         className="w-full text-white font-semibold transition-opacity hover:opacity-90 disabled:opacity-60 bg-brand-blue"
       >
-        {loading ? <Spinner className="size-4" /> : "Login"}
+        {loading && <Spinner className="size-4" />} Login
       </Button>
 
       {/* Divider */}
