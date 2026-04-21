@@ -7,6 +7,7 @@ export const register = (data: {
   fullName: string;
   email: string;
   passwordHash: string;
+  avatar?: string | undefined;
 }) => axios.post(`${base()}/register`, data);
 
 /** POST /auth/login */
