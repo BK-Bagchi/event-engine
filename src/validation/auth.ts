@@ -30,3 +30,10 @@ export const registerSchema = z
   });
 
 export type RegisterSchema = z.infer<typeof registerSchema>;
+
+export const loginSchema = z.object({
+  email,
+  password,
+});
+
+export type LoginSchema = z.infer<typeof loginSchema>;
