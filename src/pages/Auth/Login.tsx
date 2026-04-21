@@ -4,7 +4,7 @@ import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { Spinner } from "@/components/ui/spinner";
 
-const Login = () => {
+const Login = ({ setActiveTab }: { setActiveTab: (tab: string) => void }) => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
@@ -61,6 +61,10 @@ const Login = () => {
         <a
           href="#"
           className="text-xs text-brand-blue hover:text-brand-hover-blue transition-colors"
+          onClick={(e) => {
+            e.preventDefault();
+            setActiveTab("forgot-password");
+          }}
         >
           Forgot Password?
         </a>

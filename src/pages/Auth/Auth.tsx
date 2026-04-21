@@ -1,9 +1,13 @@
+import { useState } from "react";
 import banner from "@/assets/event-engine-banner.png";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@components/ui/tabs";
-import Login from "./Login";
-import Register from "./Register";
+import Login from "@pages/Auth/Login";
+import Register from "@pages/Auth/Register";
+import ForgotPassword from "@pages/Auth/ForgotPassword";
 
 const Auth = () => {
+  const [activeTab, setActiveTab] = useState("login");
+
   return (
     <div className="h-[90vh] bg-bg-main flex items-center justify-center px-4">
       <div className="w-full max-w-md flex flex-col items-center">
@@ -13,7 +17,7 @@ const Auth = () => {
           className="w-full mb-8 object-contain"
         />
 
-        <Tabs defaultValue="login" className="w-full">
+        <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
           <TabsList className="w-full">
             <TabsTrigger value="login" className="flex-1">
               Login
@@ -24,11 +28,15 @@ const Auth = () => {
           </TabsList>
 
           <TabsContent value="login" className="mt-4">
-            <Login />
+            <Login {...{ setActiveTab }} />
           </TabsContent>
 
           <TabsContent value="register" className="mt-4">
-            <Register />
+            <Register {...{ setActiveTab }} />
+          </TabsContent>
+
+          <TabsContent value="forgot-password" className="mt-4">
+            <ForgotPassword {...{ setActiveTab }} />
           </TabsContent>
         </Tabs>
       </div>

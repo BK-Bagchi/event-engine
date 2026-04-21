@@ -18,7 +18,11 @@ const uploadToImgbb = async (file: File): Promise<string> => {
   return data.data.url as string;
 };
 
-const Register = () => {
+const Register = ({
+  setActiveTab,
+}: {
+  setActiveTab: (tab: string) => void;
+}) => {
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
   const [email, setEmail] = useState("");
@@ -127,6 +131,10 @@ const Register = () => {
         <a
           href="#"
           className="text-xs text-brand-blue hover:text-brand-hover-blue transition-colors"
+          onClick={(e) => {
+            e.preventDefault();
+            setActiveTab("forgot-password");
+          }}
         >
           Forgot Password?
         </a>
