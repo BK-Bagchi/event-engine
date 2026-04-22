@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { EyeIcon, EyeOffIcon } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
@@ -10,6 +11,8 @@ import { AuthAPI } from "@/api";
 import { getErrorMessage } from "@/utils/error";
 import { toast } from "sonner";
 import FormError from "@/components/form/FormError";
+import { useAuth } from "@/hooks/useAuth";
+import { useNavigate } from "react-router-dom";
 
 interface LoginDataType {
   email: string;
@@ -17,6 +20,9 @@ interface LoginDataType {
 }
 
 const Login = ({ setActiveTab }: { setActiveTab: (tab: string) => void }) => {
+  const { login } = useAuth();
+  const navigate = useNavigate();
+
   const {
     register,
     handleSubmit,
@@ -24,9 +30,10 @@ const Login = ({ setActiveTab }: { setActiveTab: (tab: string) => void }) => {
   } = useForm<LoginSchema>({ resolver: zodResolver(loginSchema) });
 
   const [loading, setLoading] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
 
   const onSubmit = async (data: LoginSchema) => {
-    console.log("Login form data:", data);
+    // console.log("Login form data:", data);
     // return; //ai must not remove this line. It's for testing form submission without actually calling API.
 
     setLoading(true);
@@ -36,11 +43,15 @@ const Login = ({ setActiveTab }: { setActiveTab: (tab: string) => void }) => {
         passwordHash: data.password,
       };
       const res = await AuthAPI.login(payload);
-      console.log("Login response:", res);
+
+      const { token, data: userData } = res.data || {};
+      login(userData, token); // Update auth context with user data and token
+
       toast.success(res.data?.message ?? "Logged in successfully", {
         position: "top-right",
       });
       // handle post-login actions (redirect, store token, etc.) elsewhere
+      navigate("/dashboard");
     } catch (error) {
       console.error("Login error:", error);
       const msg = getErrorMessage(error) || "Login failed. Please try again.";
@@ -74,13 +85,23 @@ const Login = ({ setActiveTab }: { setActiveTab: (tab: string) => void }) => {
             Password
           </Label>
         </div>
-        <Input
-          id="login-password"
-          type="password"
-          placeholder="••••••••"
-          {...register("password")}
-          className="bg-[#1A2235] border-[#2A3550] text-white placeholder:text-zinc-500 focus-visible:ring-brand-blue/40"
-        />
+        <div className="relative">
+          <Input
+            id="login-password"
+            type={showPassword ? "text" : "password"}
+            placeholder="••••••••"
+            {...register("password")}
+            className="w-full pr-10 bg-[#1A2235] border-[#2A3550] text-white placeholder:text-zinc-500 focus-visible:ring-brand-blue/40"
+          />
+          <button
+            type="button"
+            aria-label={showPassword ? "Hide password" : "Show password"}
+            onClick={() => setShowPassword((s) => !s)}
+            className="absolute right-2 top-1/2 -translate-y-1/2 p-1 rounded text-zinc-300 hover:text-white"
+          >
+            {showPassword ? <EyeOffIcon size={18} /> : <EyeIcon size={18} />}
+          </button>
+        </div>
         <FormError message={errors.password?.message} />
       </div>
 

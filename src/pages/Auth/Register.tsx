@@ -90,7 +90,7 @@ const Register = ({
         avatar: avatarUrl,
       };
       const res = await AuthAPI.register(payload);
-      console.log("Register response:", res);
+      // console.log("Register response:", res);
       toast.success(
         res.data?.message ?? "Registration successful! Please log in.",
         {
