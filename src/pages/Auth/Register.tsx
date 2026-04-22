@@ -91,9 +91,12 @@ const Register = ({
       };
       const res = await AuthAPI.register(payload);
       console.log("Register response:", res);
-      toast.success("Registration successful! Please log in.", {
-        position: "top-right",
-      });
+      toast.success(
+        res.data?.message ?? "Registration successful! Please log in.",
+        {
+          position: "top-right",
+        },
+      );
       setActiveTab("login");
     } catch (error) {
       console.error("Registration error:", error);

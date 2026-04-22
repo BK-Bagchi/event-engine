@@ -37,7 +37,9 @@ const Login = ({ setActiveTab }: { setActiveTab: (tab: string) => void }) => {
       };
       const res = await AuthAPI.login(payload);
       console.log("Login response:", res);
-      toast.success("Logged in successfully", { position: "top-right" });
+      toast.success(res.data?.message ?? "Logged in successfully", {
+        position: "top-right",
+      });
       // handle post-login actions (redirect, store token, etc.) elsewhere
     } catch (error) {
       console.error("Login error:", error);
