@@ -4,6 +4,7 @@ import DefaultLayout from "@/layouts/Default";
 import DashboardLayout from "@/layouts/DashboardLayout";
 import Overview from "@/pages/Dashboard/Overview";
 import LoginRoute from "@/routes/LoginRoute";
+import NotFound from "@/components/NotFound/NotFound";
 
 const AppRouter = () => {
   return (
@@ -21,6 +22,9 @@ const AppRouter = () => {
             {/* Add more dashboard pages here */}
           </Route>
         </Route>
+
+        {/* Catch-all 404 route */}
+        <Route path="*" element={<NotFound />} />
       </Route>
     </Routes>
   );
