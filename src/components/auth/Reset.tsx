@@ -55,6 +55,7 @@ export default function ResetStep({ userId, otpId, setStep }: Props) {
       toast.success(res.data?.message ?? "Password reset successfully", {
         position: "top-right",
       });
+      setStep("success");
     } catch (error) {
       console.error("Reset password error:", error);
       const msg =
@@ -62,7 +63,6 @@ export default function ResetStep({ userId, otpId, setStep }: Props) {
       toast.error(msg, { position: "top-right" });
     } finally {
       setLoading(false);
-      setStep("success");
       reset();
     }
   };

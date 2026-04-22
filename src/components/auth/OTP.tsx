@@ -51,6 +51,7 @@ export default function OTPStep({ email, userId, setStep, setOtpId }: Props) {
         position: "top-right",
       });
       setOtpId(res.data?.data?.otpId ?? ""); // Store OTP ID for later steps
+      setStep("reset");
     } catch (error) {
       console.error("Verify OTP error:", error);
       const msg =
@@ -58,7 +59,6 @@ export default function OTPStep({ email, userId, setStep, setOtpId }: Props) {
       toast.error(msg, { position: "top-right" });
     } finally {
       setLoading(false);
-      setStep("reset");
       reset();
     }
   };

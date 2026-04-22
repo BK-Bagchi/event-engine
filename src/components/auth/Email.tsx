@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
@@ -52,6 +52,7 @@ export default function EmailStep({
         position: "top-right",
       });
       setUserId(res.data.data.userId ?? ""); // Store user ID for later steps
+      setStep("otp");
     } catch (error) {
       console.error("Send OTP error:", error);
       const msg =
@@ -59,7 +60,6 @@ export default function EmailStep({
       toast.error(msg, { position: "top-right" });
     } finally {
       setLoading(false);
-      setStep("otp");
       reset();
     }
   };
