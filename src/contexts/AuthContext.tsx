@@ -39,12 +39,15 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         if (storedToken) {
           const res = await AuthAPI.verifyToken();
           if (res.status === 200) {
-            setUser(res.data.user);
+            setUser(res.data.data);
             setLoggedIn(true);
           } else logout();
         } else logout();
       } catch (error) {
-        console.error("Error verifying token:", error);
+        const msg =
+          getErrorMessage(error) ||
+          "Token verification failed. Please log in again.";
+        toast.error(msg, { position: "top-right" });
         logout();
       } finally {
         setLoading(false);

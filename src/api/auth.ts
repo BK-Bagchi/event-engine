@@ -40,7 +40,7 @@ export const changePassword = (data: {
 }) => axios.post(`${base()}/change-password`, data);
 
 /** POST /auth/verify-token */
-export const verifyToken = () => axios.post(`${base()}/verify-token`);
+export const verifyToken = () => axios.get(`${base()}/verify-token`);
 
 /** POST /auth/logout — requires auth token */
 export const logout = () => axios.post(`${base()}/logout`);
