@@ -1,10 +1,41 @@
 import { Progress } from "@/components/ui/progress";
+import { useEffect, useState } from "react";
 
 type Props = {
-  countdown: number;
+  step: "email" | "otp" | "reset" | "success";
+  setActiveTab: (tab: string) => void;
 };
 
-export default function SuccessStep({ countdown }: Props) {
+export default function SuccessStep({ step, setActiveTab }: Props) {
+  const [countdown, setCountdown] = useState(3);
+
+  // Start countdown and auto-redirect when we enter the success step
+  useEffect(() => {
+    let intervalId: number | undefined;
+    let initTimeoutId: number | undefined;
+
+    if (step === "success") {
+      // initialize countdown asynchronously to avoid synchronous setState in effect
+      initTimeoutId = window.setTimeout(() => setCountdown(3), 0);
+
+      intervalId = window.setInterval(() => {
+        setCountdown((prev) => {
+          if (prev <= 1) {
+            if (intervalId) window.clearInterval(intervalId);
+            setActiveTab("login");
+            return 0;
+          }
+          return prev - 1;
+        });
+      }, 1000);
+    }
+
+    return () => {
+      if (initTimeoutId) window.clearTimeout(initTimeoutId);
+      if (intervalId) window.clearInterval(intervalId);
+    };
+  }, [step, setActiveTab]);
+
   return (
     <div className="flex flex-col gap-5 text-center">
       <div className="flex justify-center">

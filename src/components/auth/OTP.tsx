@@ -1,38 +1,70 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Spinner } from "@/components/ui/spinner";
 //prettier-ignore
 import { InputOTP, InputOTPGroup, InputOTPSlot } from "@/components/ui/input-otp";
+import { AuthAPI } from "@/api";
+import { toast } from "sonner";
+import { getErrorMessage } from "@/utils/error";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { verifyOtpSchema, type VerifyOTPType } from "@/validation/auth";
+import FormError from "@/components/form/FormError";
 
 type Step = "email" | "otp" | "reset" | "success";
 type Props = {
   email: string;
-  otp: string;
-  setOtp: (v: string) => void;
+  userId: string;
   setStep: (s: Step) => void;
+  setOtpId: (id: string) => void;
 };
 
-export default function OTPStep({ email, otp, setOtp, setStep }: Props) {
+export default function OTPStep({ email, userId, setStep, setOtpId }: Props) {
   const [loading, setLoading] = useState(false);
+  const [otp, setOtp] = useState("");
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (otp.length !== 4) {
-      alert("Please enter a valid 4-digit OTP");
-      return;
-    }
+  const {
+    handleSubmit,
+    setValue,
+    reset,
+    formState: { errors },
+  } = useForm<VerifyOTPType>({
+    resolver: zodResolver(verifyOtpSchema),
+    defaultValues: { otp: "", userId },
+  });
+
+  // Keep form otp in sync with InputOTP changes
+  const handleOtpChange = (val: string) => {
+    setOtp(val);
+    setValue("otp", val);
+  };
+
+  const onSubmit = async (data: VerifyOTPType) => {
+    console.log("OTPStep form data:", data);
+    // return; //ai must not remove this line. It's for testing form submission without actually calling API.
+
     setLoading(true);
     try {
-      // TODO: call verifyPasswordResetOTP API
-      console.log("Verify OTP:", { email, otp });
-      setStep("reset");
+      const res = await AuthAPI.verifyPasswordResetOTP(data);
+      console.log("verifyPasswordResetOTP response:", res);
+      toast.success(res.data?.message ?? "OTP verified successfully", {
+        position: "top-right",
+      });
+      setOtpId(res.data?.data?.otpId ?? ""); // Store OTP ID for later steps
+    } catch (error) {
+      console.error("Verify OTP error:", error);
+      const msg =
+        getErrorMessage(error) || "Failed to verify OTP. Please try again.";
+      toast.error(msg, { position: "top-right" });
     } finally {
       setLoading(false);
+      setStep("reset");
+      reset();
     }
   };
 
   return (
-    <form onSubmit={handleSubmit} className="flex flex-col gap-5">
+    <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-5">
       <div className="text-center">
         <h2 className="text-lg font-semibold text-white mb-1">Verify Code</h2>
         <p className="text-sm text-zinc-400">
@@ -45,7 +77,7 @@ export default function OTPStep({ email, otp, setOtp, setStep }: Props) {
           <InputOTP
             maxLength={4}
             value={otp}
-            onChange={setOtp}
+            onChange={handleOtpChange}
             containerClassName="gap-2"
           >
             <InputOTPGroup className="gap-1">
@@ -59,6 +91,7 @@ export default function OTPStep({ email, otp, setOtp, setStep }: Props) {
             </InputOTPGroup>
           </InputOTP>
         </div>
+        <FormError message={errors.otp?.message} />
       </div>
 
       <Button

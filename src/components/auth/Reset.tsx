@@ -1,44 +1,74 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import { EyeIcon, EyeOffIcon } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { Spinner } from "@/components/ui/spinner";
+import { AuthAPI } from "@/api";
+import { toast } from "sonner";
+import { getErrorMessage } from "@/utils/error";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { resetPasswordSchema, type ResetPasswordType } from "@/validation/auth";
+import FormError from "@/components/form/FormError";
 
 type Step = "email" | "otp" | "reset" | "success";
 type Props = {
+  userId: string;
+  otpId: string;
   setStep: (s: Step) => void;
 };
 
-export default function ResetStep({ setStep }: Props) {
+export default function ResetStep({ userId, otpId, setStep }: Props) {
   const [showNew, setShowNew] = useState(false);
-  const [newPassword, setNewPassword] = useState("");
-  const [confirmPassword, setConfirmPassword] = useState("");
   const [showConfirm, setShowConfirm] = useState(false);
   const [loading, setLoading] = useState(false);
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (newPassword !== confirmPassword) {
-      alert("Passwords do not match");
-      return;
-    }
-    if (newPassword.length < 8) {
-      alert("Password must be at least 8 characters");
-      return;
-    }
+  const {
+    register,
+    handleSubmit,
+    reset,
+    formState: { errors },
+  } = useForm<ResetPasswordType>({
+    resolver: zodResolver(resetPasswordSchema),
+    defaultValues: {
+      userId,
+      otpId,
+      newPassword: "",
+      confirmPassword: "",
+    },
+  });
+
+  const onSubmit = async (data: ResetPasswordType) => {
+    console.log("ResetStep form data:", data);
+    // return; //ai must not remove this line. It's for testing form submission without actually calling API.
+
     setLoading(true);
     try {
-      // TODO: call resetPassword API
-      console.log("Reset password:", { newPassword });
-      setStep("success");
+      const payload = {
+        userId: data.userId,
+        otpId: data.otpId,
+        newPassword: data.newPassword,
+      };
+      const res = await AuthAPI.resetPassword(payload);
+      console.log("resetPassword response:", res);
+      toast.success(res.data?.message ?? "Password reset successfully", {
+        position: "top-right",
+      });
+    } catch (error) {
+      console.error("Reset password error:", error);
+      const msg =
+        getErrorMessage(error) || "Failed to reset password. Please try again.";
+      toast.error(msg, { position: "top-right" });
     } finally {
       setLoading(false);
+      setStep("success");
+      reset();
     }
   };
 
   return (
-    <form onSubmit={handleSubmit} className="flex flex-col gap-5">
+    <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-5">
       <div className="flex flex-col gap-1.5">
         <Label htmlFor="new-password" className="text-zinc-300">
           New Password
@@ -48,9 +78,7 @@ export default function ResetStep({ setStep }: Props) {
             id="new-password"
             type={showNew ? "text" : "password"}
             placeholder="••••••••"
-            value={newPassword}
-            onChange={(e) => setNewPassword(e.target.value)}
-            required
+            {...register("newPassword")}
             className="w-full pr-10 bg-[#1A2235] border-[#2A3550] text-white placeholder:text-zinc-500 focus-visible:ring-brand-blue/40"
           />
           <button
@@ -62,6 +90,7 @@ export default function ResetStep({ setStep }: Props) {
             {showNew ? <EyeOffIcon size={18} /> : <EyeIcon size={18} />}
           </button>
         </div>
+        <FormError message={errors.newPassword?.message} />
       </div>
 
       <div className="flex flex-col gap-1.5">
@@ -73,9 +102,7 @@ export default function ResetStep({ setStep }: Props) {
             id="confirm-password"
             type={showConfirm ? "text" : "password"}
             placeholder="••••••••"
-            value={confirmPassword}
-            onChange={(e) => setConfirmPassword(e.target.value)}
-            required
+            {...register("confirmPassword")}
             className="w-full pr-10 bg-[#1A2235] border-[#2A3550] text-white placeholder:text-zinc-500 focus-visible:ring-brand-blue/40"
           />
           <button
@@ -87,6 +114,7 @@ export default function ResetStep({ setStep }: Props) {
             {showConfirm ? <EyeOffIcon size={18} /> : <EyeIcon size={18} />}
           </button>
         </div>
+        <FormError message={errors.confirmPassword?.message} />
       </div>
 
       <Button
