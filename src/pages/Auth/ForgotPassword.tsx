@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import EmailStep from "@/components/auth/Email";
 import OTPStep from "@/components/auth/OTP";
 import ResetStep from "@/components/auth/Reset";
@@ -12,55 +12,21 @@ const ForgotPassword = ({
   setActiveTab: (tab: string) => void;
 }) => {
   const [step, setStep] = useState<Step>("email");
+  const [userId, setUserId] = useState<string>(""); // Store user ID for OTP verification and password reset
+  const [otpId, setOtpId] = useState<string>(""); // Store OTP ID for password reset
   const [email, setEmail] = useState("");
-  const [otp, setOtp] = useState("");
-  const [countdown, setCountdown] = useState(3);
-
-  // Start countdown and auto-redirect when we enter the success step
-  useEffect(() => {
-    let intervalId: number | undefined;
-    let initTimeoutId: number | undefined;
-
-    if (step === "success") {
-      // initialize countdown asynchronously to avoid synchronous setState in effect
-      initTimeoutId = window.setTimeout(() => setCountdown(3), 0);
-
-      intervalId = window.setInterval(() => {
-        setCountdown((prev) => {
-          if (prev <= 1) {
-            if (intervalId) window.clearInterval(intervalId);
-            setActiveTab("login");
-            return 0;
-          }
-          return prev - 1;
-        });
-      }, 1000);
-    }
-
-    return () => {
-      if (initTimeoutId) window.clearTimeout(initTimeoutId);
-      if (intervalId) window.clearInterval(intervalId);
-    };
-  }, [step, setActiveTab]);
 
   return (
     <div className="w-full max-w-md p-6 shadow-lg">
       {step === "email" && (
-        <EmailStep
-          email={email}
-          setEmail={setEmail}
-          setStep={setStep}
-          setActiveTab={setActiveTab}
-        />
+        <EmailStep {...{ email, setEmail, setStep, setActiveTab, setUserId }} />
       )}
 
-      {step === "otp" && (
-        <OTPStep email={email} otp={otp} setOtp={setOtp} setStep={setStep} />
-      )}
+      {step === "otp" && <OTPStep {...{ email, userId, setStep, setOtpId }} />}
 
-      {step === "reset" && <ResetStep setStep={setStep} />}
+      {step === "reset" && <ResetStep {...{ userId, otpId, setStep }} />}
 
-      {step === "success" && <SuccessStep countdown={countdown} />}
+      {step === "success" && <SuccessStep {...{ step, setActiveTab }} />}
 
       {/* Progress Indicator */}
       <div className="my-6 flex items-center justify-between gap-2">
