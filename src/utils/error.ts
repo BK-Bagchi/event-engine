@@ -11,6 +11,5 @@ export const getErrorMessage = (error: unknown): string => {
     const err = error as ApiError;
     return err.response?.data?.message ?? "Something went wrong";
   }
-
-  return "Something went wrong";
+  return "Something went wrong!!";
 };

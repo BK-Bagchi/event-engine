@@ -12,9 +12,8 @@ const useGoogleAuth = () => {
   const handleGoogleLogin = async (credentialResponse: CredentialResponse) => {
     try {
       const res = await googleLogin(credentialResponse);
-      console.log("Google login response:", res);
-      const { user, token, message } = res.data ?? {};
-      login(user, token);
+      const { data: userData, token, message } = res.data ?? {};
+      login(userData, token);
       toast.success(message ?? "Logged in with Google", {
         position: "top-right",
       });
