@@ -1,18 +1,18 @@
 import { z } from "zod";
+const name = z
+  .string()
+  .min(1, "Project name is required")
+  .min(3, "Project name must be at least 3 characters")
+  .max(50, "Project name must not exceed 50 characters");
+const description = z
+  .string()
+  .max(500, "Description must not exceed 500 characters")
+  .default("");
 
 export const createProjectSchema = z
   .object({
-    name: z
-      .string()
-      .min(1, "Project name is required")
-      .min(3, "Project name must be at least 3 characters")
-      .max(50, "Project name must not exceed 50 characters"),
-
-    description: z
-      .string()
-      .max(500, "Description must not exceed 500 characters")
-      .default(""),
-
+    name: name,
+    description: description,
     allowedOrigins: z
       .array(
         z.string().refine(
@@ -37,7 +37,6 @@ export const createProjectSchema = z
         ),
       )
       .min(1, "At least one allowed origin is required"),
-
     settings: z
       .object({
         saveSubmissions: z.boolean().default(true),
@@ -68,5 +67,11 @@ export const createProjectSchema = z
   })
   .strict();
 
+export const editProjectSchema = z.object({
+  name: name,
+  description: description,
+});
+
 export type CreateProjectInput = z.input<typeof createProjectSchema>;
 export type CreateProjectSchema = z.output<typeof createProjectSchema>;
+export type EditProjectInput = z.input<typeof editProjectSchema>;
