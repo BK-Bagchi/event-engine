@@ -3,7 +3,7 @@ import { useState } from "react";
 import { Key, Lock, Globe, Eye, EyeOff, X, Check, Copy } from "lucide-react";
 //prettier-ignore
 import { Drawer, DrawerContent, DrawerHeader, DrawerTitle, DrawerDescription, DrawerClose } from "@/components/ui/drawer";
-import type { Project as ProjectTypes } from "@/pages/Dashboard/Projects";
+import type { Project as ProjectTypes } from "@/types/project";
 
 // ── Copy button ───────────────────────────────────────────────
 const CopyButton = ({ value }: { value: string }) => {
