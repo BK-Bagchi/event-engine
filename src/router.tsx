@@ -5,6 +5,7 @@ import DashboardLayout from "@/layouts/DashboardLayout";
 import Overview from "@/pages/Dashboard/Overview";
 import LoginRoute from "@/routes/LoginRoute";
 import NotFound from "@/components/NotFound/NotFound";
+import Projects from "@/pages/Dashboard/Projects";
 
 const AppRouter = () => {
   return (
@@ -19,7 +20,7 @@ const AppRouter = () => {
           {/* Dashboard routes */}
           <Route path="/dashboard" element={<DashboardLayout />}>
             <Route index element={<Overview />} />
-            {/* Add more dashboard pages here */}
+            <Route path="projects" element={<Projects />} />
           </Route>
         </Route>
 
