@@ -48,6 +48,12 @@ export const regenerateSecretKey = (projectId: string) =>
 export const addAllowedOrigin = (projectId: string, data: { origin: string }) =>
   axios.post(`${base()}/${projectId}/allowed-origins`, data);
 
+/** DELETE /project/projects/:projectId/allowed-origins */
+export const removeAllowedOrigin = (
+  projectId: string,
+  data: { origin: string },
+) => axios.delete(`${base()}/${projectId}/allowed-origins`, { data });
+
 /** PATCH /project/projects/:projectId/settings */
 export const updateProjectSettings = (
   projectId: string,
