@@ -11,6 +11,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Button } from "@/components/ui/button";
 //prettier-ignore
 import { Empty, EmptyHeader, EmptyMedia, EmptyTitle, EmptyDescription } from "@/components/ui/empty";
+import CardSkeleton from "@/components/skeleton/CardSkeleton";
 
 // ── Status badge ──────────────────────────────────────────────
 const statusStyle: Record<string, string> = {
@@ -33,23 +34,6 @@ const StatusBadge = ({ status }: { status: string }) => {
 // ── Skeleton for back button ──────────────────────────────────
 const BackButtonSkeleton = () => (
   <Skeleton className="h-5 w-32 bg-[#2A3550] rounded" />
-);
-
-// ── Skeleton card (matches real card layout) ──────────────────
-const ServiceCardSkeleton = () => (
-  <Card className="bg-[#1A2235] border-[#2A3550] flex flex-col justify-between">
-    <CardHeader className="pb-2">
-      <Skeleton className="h-4 w-3/4 bg-[#2A3550]" />
-      <Skeleton className="h-3 w-1/2 bg-[#2A3550] mt-1" />
-    </CardHeader>
-    <CardContent className="flex flex-col gap-2 pb-2">
-      <Skeleton className="h-3 w-2/3 bg-[#2A3550]" />
-      <Skeleton className="h-5 w-16 rounded-full bg-[#2A3550]" />
-    </CardContent>
-    <CardFooter className="pt-2 border-t border-[#2A3550]">
-      <Skeleton className="h-8 w-20 bg-[#2A3550] rounded-md" />
-    </CardFooter>
-  </Card>
 );
 
 // ── Empty state ───────────────────────────────────────────────
@@ -106,9 +90,7 @@ const Services = ({ projectId }: { projectId: string }) => {
       )}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
         {loading ? (
-          Array.from({ length: 3 }).map((_, i) => (
-            <ServiceCardSkeleton key={i} />
-          ))
+          Array.from({ length: 3 }).map((_, i) => <CardSkeleton key={i} />)
         ) : services.length === 0 ? (
           <EmptyState />
         ) : (

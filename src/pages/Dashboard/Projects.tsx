@@ -5,7 +5,6 @@ import { toast } from "sonner";
 import { FolderOpen, Activity, BarChart2, Plus } from "lucide-react";
 //prettier-ignore
 import { Card, CardHeader, CardTitle, CardDescription, CardAction, CardContent, CardFooter } from "@/components/ui/card";
-import { Skeleton } from "@/components/ui/skeleton";
 import { Button } from "@/components/ui/button";
 //prettier-ignore
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
@@ -16,6 +15,7 @@ import { ProjectAPI } from "@/api";
 import { getErrorMessage } from "@/utils/error";
 import ProjectPreviewDrawer from "@/components/drawer/ProjectPreview";
 import type { Project } from "@/types/project";
+import CardSkeleton from "@/components/skeleton/CardSkeleton";
 
 // ── Status badge ──────────────────────────────────────────────
 const statusStyles: Record<string, string> = {
@@ -31,29 +31,6 @@ const StatusBadge = ({ status }: { status: string }) => (
     <Activity size={10} />
     {status}
   </span>
-);
-
-// ── Card Skeleton ─────────────────────────────────────────────
-const ProjectCardSkeleton = () => (
-  <Card className="bg-[#1A2235] border-[#2A3550] ring-0 border">
-    <CardHeader className="border-b border-[#2A3550] pb-3">
-      <div className="flex items-start justify-between gap-2">
-        <div className="flex flex-col gap-2 flex-1">
-          <Skeleton className="h-4 w-2/3 bg-[#2A3550]" />
-          <Skeleton className="h-3 w-1/3 bg-[#2A3550]" />
-        </div>
-        <Skeleton className="h-6 w-16 rounded-md bg-[#2A3550]" />
-      </div>
-    </CardHeader>
-    <CardContent className="pt-3 flex flex-col gap-2">
-      <Skeleton className="h-3 w-full bg-[#2A3550]" />
-      <Skeleton className="h-3 w-4/5 bg-[#2A3550]" />
-    </CardContent>
-    <CardFooter className="bg-transparent border-t border-[#2A3550] flex items-center justify-between">
-      <Skeleton className="h-3 w-24 bg-[#2A3550]" />
-      <Skeleton className="h-7 w-20 rounded-md bg-[#2A3550]" />
-    </CardFooter>
-  </Card>
 );
 
 // ── Main component ────────────────────────────────────────────
@@ -116,7 +93,7 @@ const Projects = () => {
         {loading ? (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
             {Array.from({ length: 3 }).map((_, i) => (
-              <ProjectCardSkeleton key={i} />
+              <CardSkeleton key={i} />
             ))}
           </div>
         ) : projects.length === 0 ? (
