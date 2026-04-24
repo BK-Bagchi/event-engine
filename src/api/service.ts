@@ -4,6 +4,9 @@ type ProviderType = "GMAIL" | "OUTLOOK" | "SMTP" | "RESEND" | "SENDGRID";
 
 const base = (projectId: string) => `/service/projects/${projectId}/services`;
 
+/** POST /service/services */
+export const getAllServices = () => axios.get(`/service/services`);
+
 /** POST /service/projects/:projectId/services */
 export const createService = (
   projectId: string,

@@ -36,6 +36,9 @@ type TemplateVariable = {
 
 const base = (projectId: string) => `/template/projects/${projectId}/templates`;
 
+/** GET /template/templates */
+export const getAllTemplates = () => axios.get(`/template/templates`);
+
 /** POST /template/projects/:projectId/services/:serviceId/templates */
 export const createTemplate = (
   projectId: string,
