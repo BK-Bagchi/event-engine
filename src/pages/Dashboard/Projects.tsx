@@ -1,4 +1,5 @@
 import { useEffect, useState, useCallback } from "react";
+import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 //prettier-ignore
 import { FolderOpen, Activity, BarChart2, Plus } from "lucide-react";
@@ -14,38 +15,7 @@ import { CreateProjectForm } from "@/forms/CreateProjectForm";
 import { ProjectAPI } from "@/api";
 import { getErrorMessage } from "@/utils/error";
 import ProjectPreviewDrawer from "@/components/drawer/ProjectPreview";
-
-export interface Settings {
-  saveSubmissions: boolean;
-  enableAutoReply: boolean;
-  enableWebhook: boolean;
-  requireCaptcha: boolean;
-  rateLimitPerMinute: number;
-  maxAttachmentSizeMB: number;
-}
-
-export interface UsageStats {
-  totalRequests: number;
-  totalSent: number;
-  totalFailed: number;
-  totalBlocked: number;
-}
-
-export interface Project {
-  id: string;
-  userId: string;
-  name: string;
-  slug: string;
-  description: string;
-  status: string;
-  publicKey: string;
-  secretKey: string;
-  allowedOrigins: string[];
-  settings: Settings;
-  usageStats: UsageStats;
-  createdAt: string;
-  updatedAt: string;
-}
+import type { Project } from "@/types/project";
 
 // ── Status badge ──────────────────────────────────────────────
 const statusStyles: Record<string, string> = {
@@ -88,6 +58,7 @@ const ProjectCardSkeleton = () => (
 
 // ── Main component ────────────────────────────────────────────
 const Projects = () => {
+  const navigate = useNavigate();
   const [projects, setProjects] = useState<Project[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedProject, setSelectedProject] = useState<Project | null>(null);
@@ -212,7 +183,9 @@ const Projects = () => {
                     size="sm"
                     variant="outline"
                     className="h-7 text-xs bg-transparent border-[#2A3550] text-zinc-300 hover:bg-[#2A3550] hover:text-white"
-                    onClick={() => openPreview(project)}
+                    onClick={() =>
+                      navigate(`/dashboard/projects/${project.id}`)
+                    }
                   >
                     Details
                   </Button>
