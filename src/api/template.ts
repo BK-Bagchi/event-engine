@@ -8,7 +8,13 @@ type TemplateCategory =
   | "CUSTOM";
 type TemplateStatus = "DRAFT" | "ACTIVE" | "ARCHIVED";
 
-type VariableType = "TEXT" | "EMAIL" | "TEXTAREA" | "NUMBER" | "SELECT" | "FILE";
+type VariableType =
+  | "TEXT"
+  | "EMAIL"
+  | "TEXTAREA"
+  | "NUMBER"
+  | "SELECT"
+  | "FILE";
 
 type TemplateVariableValidation = {
   minLength?: number;
@@ -28,97 +34,75 @@ type TemplateVariable = {
   validation?: TemplateVariableValidation;
 };
 
-const base = (projectId: string, serviceId: string) =>
-  `/template/projects/${projectId}/services/${serviceId}/templates`;
+const base = (projectId: string) => `/template/projects/${projectId}/templates`;
 
 /** POST /template/projects/:projectId/services/:serviceId/templates */
 export const createTemplate = (
   projectId: string,
   serviceId: string,
   data: { name: string; description?: string; category?: TemplateCategory },
-) => axios.post(base(projectId, serviceId), data);
+) => axios.post(`/projects/${projectId}/services/${serviceId}/templates`, data);
 
-/** GET /template/projects/:projectId/services/:serviceId/templates */
-export const getProjectTemplates = (projectId: string, serviceId: string) =>
-  axios.get(base(projectId, serviceId));
+/** GET /template/projects/:projectId/templates */
+export const getProjectTemplates = (projectId: string) =>
+  axios.get(base(projectId));
 
-/** GET /template/projects/:projectId/services/:serviceId/templates/:templateId */
-export const getTemplate = (
-  projectId: string,
-  serviceId: string,
-  templateId: string,
-) => axios.get(`${base(projectId, serviceId)}/${templateId}`);
+/** GET /template/projects/:projectId/templates/:templateId */
+export const getTemplate = (projectId: string, templateId: string) =>
+  axios.get(`${base(projectId)}/${templateId}`);
 
-/** PATCH /template/projects/:projectId/services/:serviceId/templates/:templateId/status */
+/** PATCH /template/projects/:projectId/templates/:templateId/status */
 export const updateTemplateStatus = (
   projectId: string,
-  serviceId: string,
   templateId: string,
   data: { status: TemplateStatus },
-) => axios.patch(`${base(projectId, serviceId)}/${templateId}/status`, data);
+) => axios.patch(`${base(projectId)}/${templateId}/status`, data);
 
-/** POST /template/projects/:projectId/services/:serviceId/templates/:templateId/config */
+/** POST /template/projects/:projectId/templates/:templateId/config */
 export const configTemplate = (
   projectId: string,
-  serviceId: string,
   templateId: string,
-    data: {
+  data: {
     subjectTemplate?: string;
     htmlTemplate?: string;
     textTemplate?: string;
     variables?: TemplateVariable[];
   },
-) => axios.post(`${base(projectId, serviceId)}/${templateId}/config`, data);
+) => axios.post(`${base(projectId)}/${templateId}/config`, data);
 
-/** PATCH /template/projects/:projectId/services/:serviceId/templates/:templateId/config */
+/** PATCH /template/projects/:projectId/templates/:templateId/config */
 export const updateTemplateConfig = (
   projectId: string,
-  serviceId: string,
   templateId: string,
-    data: {
+  data: {
     subjectTemplate?: string;
     htmlTemplate?: string;
     textTemplate?: string;
     variables?: TemplateVariable[];
   },
-) => axios.patch(`${base(projectId, serviceId)}/${templateId}/config`, data);
+) => axios.patch(`${base(projectId)}/${templateId}/config`, data);
 
-/** POST /template/projects/:projectId/services/:serviceId/templates/:templateId/clone */
+/** POST /template/projects/:projectId/templates/:templateId/clone */
 export const cloneTemplate = (
   projectId: string,
-  serviceId: string,
   templateId: string,
   data: { name: string; description?: string; category?: TemplateCategory },
-) => axios.post(`${base(projectId, serviceId)}/${templateId}/clone`, data);
+) => axios.post(`${base(projectId)}/${templateId}/clone`, data);
 
-/** POST /template/projects/:projectId/services/:serviceId/templates/:templateId/delivery-config */
+/** POST /template/projects/:projectId/templates/:templateId/delivery-config */
 export const setDeliveryConfig = (
   projectId: string,
-  serviceId: string,
   templateId: string,
   data: { to?: string[]; cc?: string[]; bcc?: string[] },
-) =>
-  axios.post(
-    `${base(projectId, serviceId)}/${templateId}/delivery-config`,
-    data,
-  );
+) => axios.post(`${base(projectId)}/${templateId}/delivery-config`, data);
 
-/** PATCH /template/projects/:projectId/services/:serviceId/templates/:templateId/delivery-config */
+/** PATCH /template/projects/:projectId/templates/:templateId/delivery-config */
 export const updateDeliveryConfig = (
   projectId: string,
-  serviceId: string,
   templateId: string,
   data: { to?: string[]; cc?: string[]; bcc?: string[] },
-) =>
-  axios.patch(
-    `${base(projectId, serviceId)}/${templateId}/delivery-config`,
-    data,
-  );
+) => axios.patch(`${base(projectId)}/${templateId}/delivery-config`, data);
 
-/** PATCH /template/projects/:projectId/services/:serviceId/templates/:templateId/auto-reply-status */
-export const toggleAutoReplyStatus = (
-  projectId: string,
-  serviceId: string,
-  templateId: string,
-) =>
-  axios.patch(`${base(projectId, serviceId)}/${templateId}/auto-reply-status`);
+/** PATCH /template/projects/:projectId/templates/:templateId/auto-reply-status */
+export const toggleAutoReplyStatus = (projectId: string, templateId: string) =>
+  axios.patch(`${base(projectId)}/${templateId}/auto-reply-status`);
