@@ -1,11 +1,32 @@
 import { useParams } from "react-router-dom";
+import { AlertCircle } from "lucide-react";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import Project from "@/features/projects/Project";
-import Service from "@/features/projects/Service";
-import Template from "@/features/projects/Template";
+import Services from "@/features/projects/Services";
+import Templates from "@/features/projects/Templates";
+//prettier-ignore
+import { Empty, EmptyHeader, EmptyMedia, EmptyTitle, EmptyDescription } from "@/components/ui/empty";
 
 const Index = () => {
   const { id } = useParams<{ id: string }>();
+  //   empty state
+  if (!id) {
+    return (
+      <Empty className="col-span-3 border-[#2A3550] bg-[#1A2235]/50">
+        <EmptyHeader>
+          <EmptyMedia variant="icon">
+            <AlertCircle className="text-zinc-600" />
+          </EmptyMedia>
+          <EmptyTitle className="text-zinc-400">Project not found</EmptyTitle>
+          <EmptyDescription className="text-zinc-600">
+            The project ID is missing or invalid. Please check the URL and try
+            again.
+          </EmptyDescription>
+        </EmptyHeader>
+      </Empty>
+    );
+  }
+
   return (
     <div className="min-h-screen flex items-start justify-center py-10 px-4">
       <div className="w-full">
@@ -18,13 +39,13 @@ const Index = () => {
 
           <div>
             <TabsContent value="project">
-              <Project id={id!} />
+              <Project projectId={id} />
             </TabsContent>
             <TabsContent value="service">
-              <Service />
+              <Services projectId={id} />
             </TabsContent>
             <TabsContent value="template">
-              <Template />
+              <Templates projectId={id} />
             </TabsContent>
           </div>
         </Tabs>

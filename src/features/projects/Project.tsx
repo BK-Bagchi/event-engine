@@ -20,7 +20,7 @@ const Skeleton = ({ className }: { className?: string }) => (
   <div className={`animate-pulse rounded-md bg-[#2A3550]/60 ${className}`} />
 );
 
-const Project = ({ id }: { id: string }) => {
+const Project = ({ projectId: id }: { projectId: string }) => {
   const navigate = useNavigate();
 
   const [project, setProject] = useState<ProjectType | null>(null);
@@ -105,7 +105,7 @@ const Project = ({ id }: { id: string }) => {
               size="sm"
               variant="outline"
               onClick={() => setEditDialogOpen(true)}
-              className="shrink-0 border-[#2A3550] text-zinc-300 hover:bg-[#2A3550] gap-1.5"
+              className="shrink-0 border-[#2A3550] text-zinc-800 hover:bg-[#2A3550] gap-1.5 hover:text-white"
             >
               <Pencil size={13} />
               Edit
