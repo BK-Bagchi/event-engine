@@ -6,7 +6,7 @@ import Overview from "@/pages/Dashboard/Overview";
 import LoginRoute from "@/routes/LoginRoute";
 import NotFound from "@/components/NotFound/NotFound";
 import Projects from "@/pages/Dashboard/Projects";
-import Project from "@/components/projects/Project";
+import ProjectIndex from "@/features/projects/Index";
 
 const AppRouter = () => {
   return (
@@ -22,7 +22,7 @@ const AppRouter = () => {
           <Route path="/dashboard" element={<DashboardLayout />}>
             <Route index element={<Overview />} />
             <Route path="projects" element={<Projects />} />
-            <Route path="projects/:id" element={<Project />} />
+            <Route path="projects/:id" element={<ProjectIndex />} />
           </Route>
         </Route>
 

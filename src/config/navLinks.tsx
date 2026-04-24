@@ -1,5 +1,5 @@
 //prettier-ignore
-import { LayoutDashboard, FolderKanban, CalendarDays, Settings, UserCog, Users, BarChart3, ShieldCheck } from "lucide-react";
+import { LayoutDashboard, FolderKanban, ServerCog, LayoutTemplate, Settings, UserCog, Users, BarChart3, ShieldCheck } from "lucide-react";
 
 export type NavLink = {
   name: string;
@@ -19,9 +19,14 @@ export const commonLinks: NavLink[] = [
     route: "/dashboard/projects",
   },
   {
-    name: "Events",
-    icon: <CalendarDays size={18} />,
-    route: "/dashboard/events",
+    name: "Services",
+    icon: <ServerCog size={18} />,
+    route: "/dashboard/services",
+  },
+  {
+    name: "Templates",
+    icon: <LayoutTemplate size={18} />,
+    route: "/dashboard/templates",
   },
 ];
 

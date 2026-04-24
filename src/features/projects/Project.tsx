@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from "react";
-import { useParams, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 import { ArrowLeft, Pencil, Calendar, Hash } from "lucide-react";
 import { ProjectAPI } from "@/api";
@@ -9,19 +9,18 @@ import { Button } from "@/components/ui/button";
 //prettier-ignore
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { EditProjectForm } from "@/forms/EditProjectForm";
-import StatusSection from "./StatusSection";
-import KeysSection from "./KeysSection";
-import OriginsSection from "./OriginsSection";
-import SettingsSection from "./SettingsSection";
-import UsageStatsSection from "./UsageStatsSection";
+import StatusSection from "@/components/projects/StatusSection";
+import KeysSection from "@/components/projects/KeysSection";
+import OriginsSection from "@/components/projects/OriginsSection";
+import SettingsSection from "@/components/projects/SettingsSection";
+import UsageStatsSection from "@/components/projects/UsageStatsSection";
 
 // ── Skeleton placeholder ──────────────────────────────────────
 const Skeleton = ({ className }: { className?: string }) => (
   <div className={`animate-pulse rounded-md bg-[#2A3550]/60 ${className}`} />
 );
 
-const Project = () => {
-  const { id } = useParams<{ id: string }>();
+const Project = ({ id }: { id: string }) => {
   const navigate = useNavigate();
 
   const [project, setProject] = useState<ProjectType | null>(null);
@@ -49,7 +48,7 @@ const Project = () => {
   // ── Loading skeleton ───────────────────────────────────────
   if (loading) {
     return (
-      <div className="min-h-screen bg-[#0B1120] p-6 flex flex-col gap-6 max-w-4xl mx-auto">
+      <div className="min-h-screen bg-[#0B1120] py-6 flex flex-col gap-6 max-w-6xl mx-auto">
         <Skeleton className="h-8 w-32" />
         <Skeleton className="h-28 w-full" />
         <Skeleton className="h-20 w-full" />
@@ -70,8 +69,8 @@ const Project = () => {
   }
 
   return (
-    <div className="min-h-screen bg-[#0B1120] p-6">
-      <div className="max-w-4xl mx-auto flex flex-col gap-6">
+    <div className="min-h-screen bg-[#0B1120] py-6">
+      <div className="max-w-6xl mx-auto flex flex-col gap-6">
         {/* Back button */}
         <button
           onClick={() => navigate("/dashboard/projects")}
