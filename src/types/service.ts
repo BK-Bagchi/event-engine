@@ -1,3 +1,5 @@
+import type { Project } from "./project";
+
 export interface Service {
   id: string;
   userId: string;
@@ -9,3 +11,6 @@ export interface Service {
   createdAt: string;
   updatedAt: string;
 }
+export type ServiceWithProject = Omit<Service, "projectId"> & {
+  project: Project;
+};

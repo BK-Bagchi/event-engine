@@ -7,6 +7,7 @@ import LoginRoute from "@/routes/LoginRoute";
 import NotFound from "@/components/NotFound/NotFound";
 import Projects from "@/pages/Dashboard/Projects";
 import ProjectIndex from "@/features/projects/Index";
+import Services from "@/pages/Dashboard/Services";
 
 const AppRouter = () => {
   return (
@@ -23,6 +24,7 @@ const AppRouter = () => {
             <Route index element={<Overview />} />
             <Route path="projects" element={<Projects />} />
             <Route path="projects/:id" element={<ProjectIndex />} />
+            <Route path="services" element={<Services />} />
           </Route>
         </Route>
 
