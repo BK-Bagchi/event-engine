@@ -25,7 +25,7 @@ const StatusBadge = ({ status }: { status: string }) => {
   const s = status?.toUpperCase() ?? "INACTIVE";
   return (
     <span
-      className={`inline-block rounded-full px-2 py-0.5 text-[11px] font-medium capitalize ${statusStyle[s] ?? statusStyle["INACTIVE"]}`}
+      className={`w-fit inline-block rounded-full px-2 py-0.5 text-[11px] font-medium capitalize ${statusStyle[s] ?? statusStyle["INACTIVE"]}`}
     >
       {s.toLowerCase()}
     </span>
@@ -117,7 +117,7 @@ const Services = ({ projectId }: { projectId: string }) => {
                   </span>
                 )}
               </CardContent>
-              <CardFooter className="pt-2 border-t border-[#2A3550]">
+              <CardFooter className="pt-2 border-t border-[#2A3550] bg-[#1A2235]">
                 <Button
                   size="sm"
                   variant="outline"
@@ -126,7 +126,7 @@ const Services = ({ projectId }: { projectId: string }) => {
                       `/dashboard/projects/${projectId}/services/${service.id}`,
                     )
                   }
-                  className="border-[#2A3550] text-zinc-300 hover:bg-[#2A3550] hover:text-white text-xs"
+                  className="border-[#2A3550] bg-[#2a344b] hover:bg-[#2A3550] text-white text-xs"
                 >
                   Details
                 </Button>

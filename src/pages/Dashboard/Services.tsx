@@ -4,7 +4,7 @@ import { toast } from "sonner";
 //prettier-ignore
 import { Plus, Mail, Server, Zap, Send, Layers, Activity, Star, ServerCog } from "lucide-react";
 //prettier-ignore
-import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
+import { Card, CardHeader, CardTitle, CardContent, CardFooter } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 //prettier-ignore
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
@@ -185,26 +185,38 @@ const Services = () => {
               className="bg-[#1A2235] border border-[#2A3550] ring-0 hover:border-brand-blue/40 transition-colors flex flex-col"
             >
               <CardHeader className="border-b border-[#2A3550] pb-3">
-                <div className="flex items-start justify-between gap-3">
-                  <div className="flex flex-col gap-2 flex-1 min-w-0">
-                    <CardTitle className="text-zinc-100 text-sm font-semibold truncate">
-                      {service.name}
-                    </CardTitle>
+                <div className="flex flex-col gap-3">
+                  {/* Top row */}
+                  <div className="flex items-center justify-between gap-2 min-w-0">
+                    {/* Left side */}
+                    <div className="flex items-center gap-2 min-w-0">
+                      <CardTitle className="text-zinc-100 text-sm font-semibold truncate">
+                        {service.name}
+                      </CardTitle>
+
+                      {service.isDefault && <DefaultBadge />}
+                    </div>
+
+                    {/* Right side */}
+                    <button
+                      onClick={() =>
+                        service.project && openProjectPreview(service.project)
+                      }
+                      className="text-[11px] font-medium text-brand-blue hover:text-brand-hover-blue border border-brand-blue/30 hover:border-brand-blue/60 hover:bg-brand-blue/10 rounded px-2 py-0.5 transition-colors shrink-0"
+                    >
+                      Preview
+                    </button>
+                  </div>
+
+                  {/* Bottom row */}
+                  <div className="flex items-center gap-1.5">
                     <StatusBadge status={service.status} />
                     <ProviderBadge providerType={service.providerType} />
                   </div>
-                  <button
-                    onClick={() =>
-                      service.project && openProjectPreview(service.project)
-                    }
-                    className="text-[11px] font-medium text-brand-blue hover:text-brand-hover-blue border border-brand-blue/30 hover:border-brand-blue/60 hover:bg-brand-blue/10 rounded px-2 py-0.5 transition-colors shrink-0"
-                  >
-                    Preview
-                  </button>
                 </div>
               </CardHeader>
 
-              <CardContent className="pt-3 flex flex-col gap-2 flex-1">
+              <CardContent className="flex items-center justify-between gap-2 flex-1 py-3">
                 {/* Project row */}
                 <div className="flex items-center gap-1.5 text-xs text-zinc-500">
                   <Layers size={12} className="shrink-0" />
@@ -212,17 +224,14 @@ const Services = () => {
                     {service.project?.name ?? "—"}
                   </span>
                 </div>
-
-                {/* Default badge */}
-                {service.isDefault && <DefaultBadge />}
-
-                {/* Details button at bottom right */}
+              </CardContent>
+              <CardFooter className="pt-2 border-t border-[#2A3550] bg-[#1A2235]">
                 <div className="mt-auto flex justify-end">
                   <button className="text-[11px] font-medium text-brand-blue hover:text-brand-hover-blue border border-brand-blue/30 hover:border-brand-blue/60 hover:bg-brand-blue/10 rounded px-2 py-0.5 transition-colors">
                     Details
                   </button>
                 </div>
-              </CardContent>
+              </CardFooter>
             </Card>
           ))}
         </div>
