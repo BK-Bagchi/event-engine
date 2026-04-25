@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { toast } from "sonner";
 //prettier-ignore
@@ -12,7 +13,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } f
 import { Empty, EmptyHeader, EmptyMedia, EmptyTitle, EmptyDescription } from "@/components/ui/empty";
 import { ServiceAPI } from "@/api";
 import { getErrorMessage } from "@/utils/error";
-import type { ServiceWithProject } from "@/types/service";
+import type { Service } from "@/types/service";
 import ProjectPreviewDrawer from "@/components/drawer/ProjectPreview";
 import type { Project } from "@/types/project";
 import { CreateServiceForm } from "@/forms/CreateServiceForm";
@@ -103,6 +104,7 @@ const DefaultBadge = () => (
 
 // ── Main component ────────────────────────────────────────────
 const Services = () => {
+  const navigate = useNavigate();
   const [selectedProject, setSelectedProject] = useState<Project | null>(null);
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [dialogOpen, setDialogOpen] = useState(false);
@@ -113,7 +115,7 @@ const Services = () => {
     isError,
     error,
     refetch,
-  } = useQuery<ServiceWithProject[]>({
+  } = useQuery<Service[]>({
     queryKey: ["services"],
     queryFn: async () => {
       const res = await ServiceAPI.getAllServices();
@@ -196,16 +198,6 @@ const Services = () => {
 
                       {service.isDefault && <DefaultBadge />}
                     </div>
-
-                    {/* Right side */}
-                    <button
-                      onClick={() =>
-                        service.project && openProjectPreview(service.project)
-                      }
-                      className="text-[11px] font-medium text-brand-blue hover:text-brand-hover-blue border border-brand-blue/30 hover:border-brand-blue/60 hover:bg-brand-blue/10 rounded px-2 py-0.5 transition-colors shrink-0"
-                    >
-                      Preview
-                    </button>
                   </div>
 
                   {/* Bottom row */}
@@ -216,7 +208,7 @@ const Services = () => {
                 </div>
               </CardHeader>
 
-              <CardContent className="flex items-center justify-between gap-2 flex-1 py-3">
+              <CardContent className="flex items-center gap-2 flex-1 py-3">
                 {/* Project row */}
                 <div className="flex items-center gap-1.5 text-xs text-zinc-500">
                   <Layers size={12} className="shrink-0" />
@@ -224,10 +216,26 @@ const Services = () => {
                     {service.project?.name ?? "—"}
                   </span>
                 </div>
+                {/* Right side */}
+                <button
+                  onClick={() =>
+                    service.project && openProjectPreview(service.project)
+                  }
+                  className="text-[11px] font-medium text-brand-blue hover:text-brand-hover-blue border border-brand-blue/30 hover:border-brand-blue/60 hover:bg-brand-blue/10 rounded px-2 py-0.5 transition-colors shrink-0"
+                >
+                  Preview
+                </button>
               </CardContent>
               <CardFooter className="pt-2 border-t border-[#2A3550] bg-[#1A2235]">
                 <div className="mt-auto flex justify-end">
-                  <button className="text-[11px] font-medium text-brand-blue hover:text-brand-hover-blue border border-brand-blue/30 hover:border-brand-blue/60 hover:bg-brand-blue/10 rounded px-2 py-0.5 transition-colors">
+                  <button
+                    onClick={() =>
+                      navigate(
+                        `/dashboard/services/${service.project._id}/${service.id}`,
+                      )
+                    }
+                    className="text-[11px] font-medium text-brand-blue hover:text-brand-hover-blue border border-brand-blue/30 hover:border-brand-blue/60 hover:bg-brand-blue/10 rounded px-2 py-0.5 transition-colors"
+                  >
                     Details
                   </button>
                 </div>
