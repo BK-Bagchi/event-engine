@@ -1,5 +1,6 @@
-import { useCallback, useEffect, useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { ArrowLeft, Pencil, Calendar, Hash } from "lucide-react";
 import { ProjectAPI } from "@/api";
@@ -22,31 +23,43 @@ const Skeleton = ({ className }: { className?: string }) => (
 
 const Project = ({ projectId: id }: { projectId: string }) => {
   const navigate = useNavigate();
+  const queryClient = useQueryClient();
 
-  const [project, setProject] = useState<ProjectType | null>(null);
-  const [loading, setLoading] = useState(false);
   const [editDialogOpen, setEditDialogOpen] = useState(false);
   const [editLoading, setEditLoading] = useState(false);
 
-  const fetchProject = useCallback(async () => {
-    setLoading(true);
-    try {
-      const res = await ProjectAPI.getProject(id!);
-      setProject(res.data.data);
-    } catch (error) {
-      const msg = getErrorMessage(error) || "Failed to load project.";
-      toast.error(msg, { position: "top-right" });
-    } finally {
-      setLoading(false);
-    }
-  }, [id]);
+  const {
+    data: project,
+    isLoading,
+    isError,
+    error,
+  } = useQuery<ProjectType>({
+    queryKey: ["project", id],
+    queryFn: async () => {
+      const res = await ProjectAPI.getProject(id);
+      return res.data.data;
+    },
+  });
 
   useEffect(() => {
-    fetchProject();
-  }, [fetchProject]);
+    if (isError) {
+      const msg = getErrorMessage(error) || "Failed to load project.";
+      toast.error(msg, { position: "top-right" });
+    }
+  }, [isError, error]);
+
+  const setProject: React.Dispatch<React.SetStateAction<ProjectType | null>> = (
+    action,
+  ) => {
+    queryClient.setQueryData<ProjectType>(["project", id], (old) => {
+      if (!old) return old;
+      const result = typeof action === "function" ? action(old) : action;
+      return result ?? old;
+    });
+  };
 
   // ── Loading skeleton ───────────────────────────────────────
-  if (loading) {
+  if (isLoading) {
     return (
       <div className="min-h-screen bg-[#0B1120] py-6 flex flex-col gap-6 max-w-6xl mx-auto">
         <Skeleton className="h-8 w-32" />

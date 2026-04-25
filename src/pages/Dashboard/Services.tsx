@@ -1,4 +1,5 @@
-import { useCallback, useEffect, useState } from "react";
+import { useState, useEffect } from "react";
+import { useQuery } from "@tanstack/react-query";
 import { toast } from "sonner";
 //prettier-ignore
 import { Plus, Mail, Server, Zap, Send, Layers, Activity, Star, ServerCog } from "lucide-react";
@@ -102,28 +103,30 @@ const DefaultBadge = () => (
 
 // ── Main component ────────────────────────────────────────────
 const Services = () => {
-  const [services, setServices] = useState<ServiceWithProject[]>([]);
-  const [loading, setLoading] = useState(true);
   const [selectedProject, setSelectedProject] = useState<Project | null>(null);
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [dialogOpen, setDialogOpen] = useState(false);
 
-  const fetchServices = useCallback(async () => {
-    setLoading(true);
-    try {
+  const {
+    data: services = [],
+    isLoading,
+    isError,
+    error,
+    refetch,
+  } = useQuery<ServiceWithProject[]>({
+    queryKey: ["services"],
+    queryFn: async () => {
       const res = await ServiceAPI.getAllServices();
-      setServices(res.data.data);
-    } catch (error) {
-      const msg = getErrorMessage(error) || "Failed to load services.";
-      toast.error(msg, { position: "top-right" });
-    } finally {
-      setLoading(false);
-    }
-  }, []);
+      return res.data.data;
+    },
+  });
 
   useEffect(() => {
-    fetchServices();
-  }, [fetchServices]);
+    if (isError) {
+      const msg = getErrorMessage(error) || "Failed to load services.";
+      toast.error(msg, { position: "top-right" });
+    }
+  }, [isError, error]);
 
   const openProjectPreview = (project: Project) => {
     setSelectedProject(project);
@@ -150,7 +153,7 @@ const Services = () => {
       </div>
 
       {/* Grid */}
-      {loading ? (
+      {isLoading ? (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
           {Array.from({ length: 3 }).map((_, i) => (
             <CardSkeleton key={i} />
@@ -247,7 +250,9 @@ const Services = () => {
             </DialogDescription>
           </DialogHeader>
           <CreateServiceForm
-            fetchServices={fetchServices}
+            fetchServices={() => {
+              refetch();
+            }}
             onCancel={() => setDialogOpen(false)}
           />
         </DialogContent>

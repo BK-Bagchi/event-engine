@@ -1,5 +1,6 @@
-import { useCallback, useEffect, useState } from "react";
+import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import { useQuery } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { ServerCog, ArrowLeft } from "lucide-react";
 import { ServiceAPI } from "@/api";
@@ -55,29 +56,30 @@ const EmptyState = () => (
 // ── Main component ────────────────────────────────────────────
 const Services = ({ projectId }: { projectId: string }) => {
   const navigate = useNavigate();
-  const [services, setServices] = useState<Service[]>([]);
-  const [loading, setLoading] = useState(true);
 
-  const fetchServices = useCallback(async () => {
-    setLoading(true);
-    try {
+  const {
+    data: services = [],
+    isLoading,
+    isError,
+    error,
+  } = useQuery<Service[]>({
+    queryKey: ["project-services", projectId],
+    queryFn: async () => {
       const res = await ServiceAPI.getProjectServices(projectId);
-      setServices(res.data.data);
-    } catch (error) {
-      const msg = getErrorMessage(error) || "Failed to load services.";
-      toast.error(msg, { position: "top-right" });
-    } finally {
-      setLoading(false);
-    }
-  }, [projectId]);
+      return res.data.data;
+    },
+  });
 
   useEffect(() => {
-    fetchServices();
-  }, [fetchServices]);
+    if (isError) {
+      const msg = getErrorMessage(error) || "Failed to load services.";
+      toast.error(msg, { position: "top-right" });
+    }
+  }, [isError, error]);
 
   return (
     <div className="flex flex-col gap-6 py-6">
-      {loading ? (
+      {isLoading ? (
         <BackButtonSkeleton />
       ) : (
         <button
@@ -89,7 +91,7 @@ const Services = ({ projectId }: { projectId: string }) => {
         </button>
       )}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-        {loading ? (
+        {isLoading ? (
           Array.from({ length: 3 }).map((_, i) => <CardSkeleton key={i} />)
         ) : services.length === 0 ? (
           <EmptyState />

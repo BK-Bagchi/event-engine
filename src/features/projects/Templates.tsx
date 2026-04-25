@@ -1,5 +1,6 @@
-import { useCallback, useEffect, useState } from "react";
+import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import { useQuery } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { LayoutTemplate, ArrowLeft } from "lucide-react";
 import { TemplateAPI } from "@/api";
@@ -76,29 +77,30 @@ const EmptyState = () => (
 // ── Main component ────────────────────────────────────────────
 const Templates = ({ projectId }: { projectId: string }) => {
   const navigate = useNavigate();
-  const [templates, setTemplates] = useState<Template[]>([]);
-  const [loading, setLoading] = useState(true);
 
-  const fetchTemplates = useCallback(async () => {
-    setLoading(true);
-    try {
+  const {
+    data: templates = [],
+    isLoading,
+    isError,
+    error,
+  } = useQuery<Template[]>({
+    queryKey: ["project-templates", projectId],
+    queryFn: async () => {
       const res = await TemplateAPI.getProjectTemplates(projectId);
-      setTemplates(res.data.data);
-    } catch (error) {
-      const msg = getErrorMessage(error) || "Failed to load templates.";
-      toast.error(msg, { position: "top-right" });
-    } finally {
-      setLoading(false);
-    }
-  }, [projectId]);
+      return res.data.data;
+    },
+  });
 
   useEffect(() => {
-    fetchTemplates();
-  }, [fetchTemplates]);
+    if (isError) {
+      const msg = getErrorMessage(error) || "Failed to load templates.";
+      toast.error(msg, { position: "top-right" });
+    }
+  }, [isError, error]);
 
   return (
     <div className="flex flex-col gap-6 py-6">
-      {loading ? (
+      {isLoading ? (
         <BackButtonSkeleton />
       ) : (
         <button
@@ -110,7 +112,7 @@ const Templates = ({ projectId }: { projectId: string }) => {
         </button>
       )}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-        {loading ? (
+        {isLoading ? (
           Array.from({ length: 3 }).map((_, i) => <CardSkeleton key={i} />)
         ) : templates.length === 0 ? (
           <EmptyState />
