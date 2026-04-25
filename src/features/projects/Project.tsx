@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useQuery } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { ArrowLeft, Pencil, Calendar, Hash } from "lucide-react";
 import { ProjectAPI } from "@/api";
@@ -23,10 +23,8 @@ const Skeleton = ({ className }: { className?: string }) => (
 
 const Project = ({ projectId: id }: { projectId: string }) => {
   const navigate = useNavigate();
-  const queryClient = useQueryClient();
 
   const [editDialogOpen, setEditDialogOpen] = useState(false);
-  const [editLoading, setEditLoading] = useState(false);
 
   const {
     data: project,
@@ -47,16 +45,6 @@ const Project = ({ projectId: id }: { projectId: string }) => {
       toast.error(msg, { position: "top-right" });
     }
   }, [isError, error]);
-
-  const setProject: React.Dispatch<React.SetStateAction<ProjectType | null>> = (
-    action,
-  ) => {
-    queryClient.setQueryData<ProjectType>(["project", id], (old) => {
-      if (!old) return old;
-      const result = typeof action === "function" ? action(old) : action;
-      return result ?? old;
-    });
-  };
 
   // ── Loading skeleton ───────────────────────────────────────
   if (isLoading) {
@@ -160,10 +148,7 @@ const Project = ({ projectId: id }: { projectId: string }) => {
           </DialogHeader>
           <EditProjectForm
             project={project}
-            setProject={setProject}
             setEditDialogOpen={setEditDialogOpen}
-            setEditLoading={setEditLoading}
-            loading={editLoading}
             onCancel={() => setEditDialogOpen(false)}
           />
         </DialogContent>

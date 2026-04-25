@@ -1,5 +1,6 @@
 import { Plus, Trash2 } from "lucide-react";
 import { useForm, useFieldArray, Controller } from "react-hook-form";
+import { useMutation } from "@tanstack/react-query";
 import { zodResolver } from "@hookform/resolvers/zod";
 //prettier-ignore
 import { createProjectSchema, type CreateProjectInput } from "@/validation/project";
@@ -15,17 +16,13 @@ import { getErrorMessage } from "@/utils/error";
 import { toast } from "sonner";
 
 interface CreateProjectFormProps {
-  loading?: boolean;
-  setSubmitting: React.Dispatch<React.SetStateAction<boolean>>;
   fetchProjects: () => Promise<void>;
   setDialogOpen: React.Dispatch<React.SetStateAction<boolean>>;
   onCancel?: () => void;
 }
 
 export const CreateProjectForm = ({
-  loading = false,
   setDialogOpen,
-  setSubmitting,
   fetchProjects,
   onCancel,
 }: CreateProjectFormProps) => {
@@ -62,24 +59,26 @@ export const CreateProjectForm = ({
     name: "allowedOrigins",
   });
 
-  const onSubmit = async (data: CreateProjectInput) => {
-    // console.log("Form submitted with data:", data);
-    // return; //ai must not remove this line. It's for testing form submission without actually calling API.
-
-    setSubmitting(true);
-    try {
-      const res = await ProjectAPI.createProject(data);
+  const mutation = useMutation({
+    mutationFn: (data: CreateProjectInput) => ProjectAPI.createProject(data),
+    onSuccess: (res) => {
       toast.success(res.data?.message ?? "Project created successfully", {
         position: "top-right",
       });
       setDialogOpen(false);
       fetchProjects();
-    } catch (error) {
+    },
+    onError: (error) => {
       const msg = getErrorMessage(error) || "Failed to create project.";
       toast.error(msg, { position: "top-right" });
-    } finally {
-      setSubmitting(false);
-    }
+    },
+  });
+
+  const onSubmit = (data: CreateProjectInput) => {
+    // console.log("Form submitted with data:", data);
+    // return; //ai must not remove this line. It's for testing form submission without actually calling API.
+
+    mutation.mutate(data);
   };
 
   return (
@@ -311,10 +310,10 @@ export const CreateProjectForm = ({
       <div className="flex items-center gap-3 pt-4 border-t border-[#2A3550]">
         <Button
           type="submit"
-          disabled={loading}
+          disabled={mutation.isPending}
           className="flex-1 bg-brand-blue hover:bg-brand-hover-blue text-white font-semibold"
         >
-          {loading && <Spinner className="size-4" />}
+          {mutation.isPending && <Spinner className="size-4" />}
           Create Project
         </Button>
         <Button

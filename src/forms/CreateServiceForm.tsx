@@ -1,5 +1,5 @@
-import { useEffect, useState } from "react";
 import { Controller, useForm } from "react-hook-form";
+import { useQuery, useMutation } from "@tanstack/react-query";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { toast } from "sonner";
 import { Input } from "@/components/ui/input";
@@ -15,6 +15,7 @@ import FormError from "@/components/form/FormError";
 import { getErrorMessage } from "@/utils/error";
 import type { Project } from "@/types/project";
 import { ProjectAPI, ServiceAPI } from "@/api";
+import { useEffect } from "react";
 
 interface CreateServiceFormProps {
   fetchServices: () => void;
@@ -25,13 +26,31 @@ export const CreateServiceForm = ({
   fetchServices,
   onCancel,
 }: CreateServiceFormProps) => {
-  const [projects, setProjects] = useState<Project[]>([]);
-  const [loadingProjects, setLoadingProjects] = useState(true);
+  const {
+    data: projects = [],
+    isLoading: loadingProjects,
+    isError,
+    error,
+  } = useQuery<Project[]>({
+    queryKey: ["projects"],
+    queryFn: async () => {
+      const res = await ProjectAPI.getAllProjects();
+      return res.data.data;
+    },
+  });
+
+  useEffect(() => {
+    if (isError) {
+      const msg = getErrorMessage(error) || "Failed to load projects.";
+      toast.error(msg, { position: "top-right" });
+    }
+  }, [isError, error]);
+
   const {
     register,
     handleSubmit,
     control,
-    formState: { errors, isSubmitting },
+    formState: { errors },
     reset,
   } = useForm<CreateServiceInput>({
     resolver: zodResolver(createServiceSchema),
@@ -44,47 +63,32 @@ export const CreateServiceForm = ({
     mode: "onChange",
   });
 
-  useEffect(() => {
-    let cancelled = false;
-    ProjectAPI.getAllProjects()
-      .then((res) => {
-        if (!cancelled) {
-          setProjects(res.data.data);
-          setLoadingProjects(false);
-        }
-      })
-      .catch((error) => {
-        if (!cancelled) {
-          const msg = getErrorMessage(error) || "Failed to load projects.";
-          toast.error(msg, { position: "top-right" });
-          setLoadingProjects(false);
-        }
-      });
-    return () => {
-      cancelled = true;
-    };
-  }, []);
-
-  const onSubmit = async (data: CreateServiceInput) => {
-    // console.log("Create service form data:", data);
-    // return; //ai must not remove this line.
-
-    const payload = {
-      name: data.name,
-      providerType: data.providerType,
-      isDefault: data.isDefault,
-    };
-
-    try {
-      const res = await ServiceAPI.createService(data.projectId, payload);
+  const mutation = useMutation({
+    mutationFn: (data: CreateServiceInput) => {
+      const payload = {
+        name: data.name,
+        providerType: data.providerType,
+        isDefault: data.isDefault,
+      };
+      return ServiceAPI.createService(data.projectId, payload);
+    },
+    onSuccess: (res) => {
       toast.success(res.data.message, { position: "top-right" });
       fetchServices();
       reset();
       onCancel?.();
-    } catch (error) {
+    },
+    onError: (error) => {
       const msg = getErrorMessage(error) || "Failed to create service.";
       toast.error(msg, { position: "top-right" });
-    }
+    },
+  });
+
+  const onSubmit = (data: CreateServiceInput) => {
+    // console.log("Create service form data:", data);
+    // return; //ai must not remove this line.
+
+    mutation.mutate(data);
   };
 
   return (
@@ -225,10 +229,10 @@ export const CreateServiceForm = ({
         )}
         <Button
           type="submit"
-          disabled={loadingProjects || isSubmitting}
+          disabled={loadingProjects || mutation.isPending}
           className="bg-brand-blue hover:bg-brand-hover-blue text-white font-semibold disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
         >
-          {isSubmitting && <Spinner className="size-3.5" />}
+          {mutation.isPending && <Spinner className="size-3.5" />}
           Create Service
         </Button>
       </div>

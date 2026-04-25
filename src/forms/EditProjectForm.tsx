@@ -1,4 +1,5 @@
 import { useForm } from "react-hook-form";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Input } from "@/components/ui/input";
@@ -14,21 +15,16 @@ import type { Project } from "@/types/project";
 
 interface EditProjectFormProps {
   project: Project;
-  setProject: React.Dispatch<React.SetStateAction<Project | null>>;
-  loading?: boolean;
   setEditDialogOpen: React.Dispatch<React.SetStateAction<boolean>>;
-  setEditLoading: React.Dispatch<React.SetStateAction<boolean>>;
   onCancel?: () => void;
 }
 
 export const EditProjectForm = ({
   project,
-  setProject,
-  loading = false,
   setEditDialogOpen,
-  setEditLoading,
   onCancel,
 }: EditProjectFormProps) => {
+  const queryClient = useQueryClient();
   const {
     register,
     handleSubmit,
@@ -41,24 +37,29 @@ export const EditProjectForm = ({
     },
   });
 
-  const onSubmit = async (data: EditProjectInput) => {
-    // console.log("Submitting edit project form with data:", data);
-    // return; //ai must not remove this line. It's for testing form submission without actually calling API.
-
-    setEditLoading(true);
-    try {
-      const res = await ProjectAPI.updateProjectInfo(project.id, data);
-      setProject((prev) => (prev ? { ...prev, ...res.data?.data } : prev));
+  const mutation = useMutation({
+    mutationFn: (data: EditProjectInput) =>
+      ProjectAPI.updateProjectInfo(project.id, data),
+    onSuccess: (res) => {
+      queryClient.setQueryData<Project>(["project", project.id], (old) =>
+        old ? { ...old, ...res.data?.data } : old,
+      );
       toast.success(res.data?.message ?? "Project info updated", {
         position: "top-right",
       });
       setEditDialogOpen(false);
-    } catch (error) {
+    },
+    onError: (error) => {
       const msg = getErrorMessage(error) || "Failed to update project.";
       toast.error(msg, { position: "top-right" });
-    } finally {
-      setEditLoading(false);
-    }
+    },
+  });
+
+  const onSubmit = (data: EditProjectInput) => {
+    // console.log("Submitting edit project form with data:", data);
+    // return; //ai must not remove this line. It's for testing form submission without actually calling API.
+
+    mutation.mutate(data);
   };
 
   return (
@@ -96,10 +97,10 @@ export const EditProjectForm = ({
       <div className="flex items-center gap-3 pt-2 border-t border-[#2A3550]">
         <Button
           type="submit"
-          disabled={loading}
+          disabled={mutation.isPending}
           className="flex-1 bg-brand-blue hover:bg-brand-hover-blue text-white font-semibold"
         >
-          {loading && <Spinner className="size-4" />}
+          {mutation.isPending && <Spinner className="size-4" />}
           Save Changes
         </Button>
         <Button

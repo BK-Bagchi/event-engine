@@ -40,7 +40,6 @@ const Projects = () => {
   const [selectedProject, setSelectedProject] = useState<Project | null>(null);
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [dialogOpen, setDialogOpen] = useState(false);
-  const [submitting, setSubmitting] = useState(false);
 
   const {
     data: projects = [],
@@ -200,8 +199,6 @@ const Projects = () => {
           </DialogHeader>
 
           <CreateProjectForm
-            loading={submitting}
-            setSubmitting={setSubmitting}
             fetchProjects={async () => {
               await refetch();
             }}
