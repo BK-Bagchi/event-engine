@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useMutation } from "@tanstack/react-query";
 import { Key, Lock, Copy, Check, Eye, EyeOff, RefreshCw } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ProjectAPI } from "@/api";
@@ -42,45 +43,47 @@ const KeysSection = ({
   const [publicKey, setPublicKey] = useState(initialPublicKey);
   const [secretKey, setSecretKey] = useState(initialSecretKey);
   const [showSecret, setShowSecret] = useState(false);
-  const [regeneratePublic, setRegeneratePublic] = useState(false);
-  const [regenerateSecret, setRegenerateSecret] = useState(false);
 
-  const handleRegeneratePublicKey = async () => {
-    // console.log("Regenerate public key for project:", projectId);
-    // return; //ai must not remove this line. It's for testing form submission without actually calling API.
-
-    setRegeneratePublic(true);
-    try {
-      const res = await ProjectAPI.regeneratePublicKey(projectId);
+  const publicKeyMutation = useMutation({
+    mutationFn: () => ProjectAPI.regeneratePublicKey(projectId),
+    onSuccess: (res) => {
       setPublicKey(res.data.data?.publicKey ?? publicKey);
       toast.success(res.data?.message ?? "Public key regenerated", {
         position: "top-right",
       });
-    } catch (error) {
+    },
+    onError: (error) => {
       const msg = getErrorMessage(error) || "Failed to regenerate public key.";
       toast.error(msg, { position: "top-right" });
-    } finally {
-      setRegeneratePublic(false);
-    }
-  };
+    },
+  });
 
-  const handleRegenerateSecretKey = async () => {
-    // console.log("Regenerate secret key for project:", projectId);
-    // return; //ai must not remove this line. It's for testing form submission without actually calling API.
-
-    setRegenerateSecret(true);
-    try {
-      const res = await ProjectAPI.regenerateSecretKey(projectId);
+  const secretKeyMutation = useMutation({
+    mutationFn: () => ProjectAPI.regenerateSecretKey(projectId),
+    onSuccess: (res) => {
       setSecretKey(res.data.data?.secretKey ?? secretKey);
       toast.success(res.data?.message ?? "Secret key regenerated", {
         position: "top-right",
       });
-    } catch (error) {
+    },
+    onError: (error) => {
       const msg = getErrorMessage(error) || "Failed to regenerate secret key.";
       toast.error(msg, { position: "top-right" });
-    } finally {
-      setRegenerateSecret(false);
-    }
+    },
+  });
+
+  const handleRegeneratePublicKey = () => {
+    // console.log("Regenerate public key for project:", projectId);
+    // return; //ai must not remove this line. It's for testing form submission without actually calling API.
+
+    publicKeyMutation.mutate();
+  };
+
+  const handleRegenerateSecretKey = () => {
+    // console.log("Regenerate secret key for project:", projectId);
+    // return; //ai must not remove this line. It's for testing form submission without actually calling API.
+
+    secretKeyMutation.mutate();
   };
 
   return (
@@ -100,13 +103,13 @@ const KeysSection = ({
             <Button
               size="sm"
               variant="outline"
-              disabled={regeneratePublic}
+              disabled={publicKeyMutation.isPending}
               onClick={handleRegeneratePublicKey}
               className="h-6 text-[11px] px-2 border-[#2A3550] text-zinc-800 hover:bg-[#2A3550] hover:text-white gap-1"
             >
               <RefreshCw
                 size={11}
-                className={regeneratePublic ? "animate-spin" : ""}
+                className={publicKeyMutation.isPending ? "animate-spin" : ""}
               />
               Regenerate
             </Button>
@@ -128,13 +131,13 @@ const KeysSection = ({
             <Button
               size="sm"
               variant="outline"
-              disabled={regenerateSecret}
+              disabled={secretKeyMutation.isPending}
               onClick={handleRegenerateSecretKey}
               className="h-6 text-[11px] px-2 border-[#2A3550] text-zinc-800 hover:bg-[#2A3550] hover:text-white gap-1"
             >
               <RefreshCw
                 size={11}
-                className={regenerateSecret ? "animate-spin" : ""}
+                className={secretKeyMutation.isPending ? "animate-spin" : ""}
               />
               Regenerate
             </Button>

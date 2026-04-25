@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useMutation } from "@tanstack/react-query";
 import { Globe, Plus, Trash2, Copy, Check } from "lucide-react";
 import { Spinner } from "@/components/ui/spinner";
 import { Input } from "@/components/ui/input";
@@ -54,10 +55,39 @@ const OriginsSection = ({ projectId, initialOrigins }: OriginsSectionProps) => {
   const [origins, setOrigins] = useState<string[]>(initialOrigins);
   const [newOrigin, setNewOrigin] = useState("https://");
   const [inputError, setInputError] = useState("");
-  const [adding, setAdding] = useState(false);
-  const [removingOrigin, setRemovingOrigin] = useState<string | null>(null);
 
-  const handleAdd = async () => {
+  const addMutation = useMutation({
+    mutationFn: (origin: string) =>
+      ProjectAPI.addAllowedOrigin(projectId, { origin }),
+    onSuccess: (res, origin) => {
+      setOrigins((prev) => [...prev, origin]);
+      setNewOrigin("https://");
+      toast.success(res.data?.message ?? "Origin added", {
+        position: "top-right",
+      });
+    },
+    onError: (error) => {
+      const msg = getErrorMessage(error) || "Failed to add origin.";
+      toast.error(msg, { position: "top-right" });
+    },
+  });
+
+  const removeMutation = useMutation({
+    mutationFn: (origin: string) =>
+      ProjectAPI.removeAllowedOrigin(projectId, { origin }),
+    onSuccess: (res, origin) => {
+      setOrigins((prev) => prev.filter((o) => o !== origin));
+      toast.success(res.data?.message ?? "Origin removed", {
+        position: "top-right",
+      });
+    },
+    onError: (error) => {
+      const msg = getErrorMessage(error) || "Failed to remove origin.";
+      toast.error(msg, { position: "top-right" });
+    },
+  });
+
+  const handleAdd = () => {
     if (!isValidOrigin(newOrigin)) {
       setInputError(
         "Must be a valid origin like https://diptoverse.com (no path, query, or fragment)",
@@ -69,40 +99,11 @@ const OriginsSection = ({ projectId, initialOrigins }: OriginsSectionProps) => {
       return;
     }
     setInputError("");
-    setAdding(true);
-    try {
-      const res = await ProjectAPI.addAllowedOrigin(projectId, {
-        origin: newOrigin,
-      });
-      setOrigins((prev) => [...prev, newOrigin]);
-      setNewOrigin("https://");
-      toast.success(res.data?.message ?? "Origin added", {
-        position: "top-right",
-      });
-    } catch (error) {
-      const msg = getErrorMessage(error) || "Failed to add origin.";
-      toast.error(msg, { position: "top-right" });
-    } finally {
-      setAdding(false);
-    }
+    addMutation.mutate(newOrigin);
   };
 
-  const handleRemove = async (origin: string) => {
-    setRemovingOrigin(origin);
-    try {
-      const res = await ProjectAPI.removeAllowedOrigin(projectId, {
-        origin,
-      });
-      setOrigins((prev) => prev.filter((o) => o !== origin));
-      toast.success(res.data?.message ?? "Origin removed", {
-        position: "top-right",
-      });
-    } catch (error) {
-      const msg = getErrorMessage(error) || "Failed to remove origin.";
-      toast.error(msg, { position: "top-right" });
-    } finally {
-      setRemovingOrigin(null);
-    }
+  const handleRemove = (origin: string) => {
+    removeMutation.mutate(origin);
   };
 
   return (
@@ -129,11 +130,15 @@ const OriginsSection = ({ projectId, initialOrigins }: OriginsSectionProps) => {
                 <CopyButton value={origin} />
                 <button
                   onClick={() => handleRemove(origin)}
-                  disabled={removingOrigin === origin}
+                  disabled={
+                    removeMutation.isPending &&
+                    removeMutation.variables === origin
+                  }
                   className="p-1.5 rounded text-zinc-500 hover:text-red-400 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                   title="Remove"
                 >
-                  {removingOrigin === origin ? (
+                  {removeMutation.isPending &&
+                  removeMutation.variables === origin ? (
                     <Spinner className="size-4 text-red-400" />
                   ) : (
                     <Trash2 size={13} />
@@ -163,11 +168,11 @@ const OriginsSection = ({ projectId, initialOrigins }: OriginsSectionProps) => {
           <Button
             type="button"
             size="sm"
-            disabled={adding}
+            disabled={addMutation.isPending}
             onClick={handleAdd}
             className="bg-brand-blue hover:bg-brand-hover-blue text-white gap-1 shrink-0"
           >
-            {adding && <Spinner className="size-4 text-white" />}
+            {addMutation.isPending && <Spinner className="size-4 text-white" />}
             <Plus size={14} />
             Add Origin
           </Button>

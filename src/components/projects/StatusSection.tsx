@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useMutation } from "@tanstack/react-query";
 import { Activity } from "lucide-react";
 import { Spinner } from "@/components/ui/spinner";
 //prettier-ignore
@@ -34,32 +35,33 @@ const StatusSection = ({ projectId, initialStatus }: StatusSectionProps) => {
   const [status, setStatus] = useState<string>(
     initialStatus?.toUpperCase() ?? "ACTIVE",
   );
-  const [saving, setSaving] = useState(false);
 
   const meta = statusMeta[status] ?? statusMeta["ACTIVE"];
 
-  const handleStatusChange = async (value: string) => {
+  const mutation = useMutation({
+    mutationFn: (value: string) =>
+      ProjectAPI.updateProjectStatus(projectId, {
+        status: value as ProjectStatus,
+      }),
+    onSuccess: (res, value) => {
+      const updated = res.data?.data?.status ?? value;
+      setStatus(updated);
+      toast.success(
+        `Status updated to ${statusMeta[updated]?.label ?? updated}`,
+        { position: "top-right" },
+      );
+    },
+    onError: (error) => {
+      const msg = getErrorMessage(error) || "Failed to update status.";
+      toast.error(msg, { position: "top-right" });
+    },
+  });
+
+  const handleStatusChange = (value: string) => {
     // console.log("Status changed to:", value);
     // return; //ai must not remove this line. It's for testing form submission without actually calling API.
 
-    setSaving(true);
-    try {
-      const res = await ProjectAPI.updateProjectStatus(projectId, {
-        status: value as ProjectStatus,
-      });
-      setStatus(res.data?.data?.status ?? value);
-      toast.success(
-        `Status updated to ${statusMeta[res.data?.data?.status ?? value]?.label ?? value}`,
-        {
-          position: "top-right",
-        },
-      );
-    } catch (error) {
-      const msg = getErrorMessage(error) || "Failed to update status.";
-      toast.error(msg, { position: "top-right" });
-    } finally {
-      setSaving(false);
-    }
+    mutation.mutate(value);
   };
 
   return (
@@ -82,7 +84,7 @@ const StatusSection = ({ projectId, initialStatus }: StatusSectionProps) => {
         <Select
           value={status}
           onValueChange={handleStatusChange}
-          disabled={saving}
+          disabled={mutation.isPending}
         >
           <SelectTrigger className="w-40 bg-[#0B1120] border-[#2A3550] text-zinc-300 focus:ring-brand-blue/40">
             <SelectValue />
@@ -97,7 +99,7 @@ const StatusSection = ({ projectId, initialStatus }: StatusSectionProps) => {
           </SelectContent>
         </Select>
 
-        {saving && <Spinner className="size-4 text-zinc-400" />}
+        {mutation.isPending && <Spinner className="size-4 text-zinc-400" />}
       </div>
     </section>
   );

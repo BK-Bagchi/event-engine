@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { useMutation } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { useForm, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -34,7 +35,6 @@ const SettingsSection = ({
   projectId,
   initialSettings,
 }: SettingsSectionProps) => {
-  const [saving, setSaving] = useState(false);
   const [baseline, setBaseline] = useState<Settings>(initialSettings);
 
   // keep baseline in sync if parent provides new initialSettings
@@ -60,26 +60,29 @@ const SettingsSection = ({
     },
   });
 
-  const onSubmit = async (data: SettingsInput) => {
-    setSaving(true);
-    try {
-      await ProjectAPI.updateProjectSettings(projectId, data);
+  const mutation = useMutation({
+    mutationFn: (data: SettingsInput) =>
+      ProjectAPI.updateProjectSettings(projectId, data),
+    onSuccess: (_, variables) => {
       toast.success("Settings saved", { position: "top-right" });
       // update baseline so form is considered unchanged after successful save
       setBaseline({
-        saveSubmissions: data.saveSubmissions,
-        enableAutoReply: data.enableAutoReply,
-        enableWebhook: data.enableWebhook,
-        requireCaptcha: data.requireCaptcha,
-        rateLimitPerMinute: Number(data.rateLimitPerMinute),
-        maxAttachmentSizeMB: Number(data.maxAttachmentSizeMB),
+        saveSubmissions: variables.saveSubmissions,
+        enableAutoReply: variables.enableAutoReply,
+        enableWebhook: variables.enableWebhook,
+        requireCaptcha: variables.requireCaptcha,
+        rateLimitPerMinute: Number(variables.rateLimitPerMinute),
+        maxAttachmentSizeMB: Number(variables.maxAttachmentSizeMB),
       });
-    } catch (error) {
+    },
+    onError: (error) => {
       const msg = getErrorMessage(error) || "Failed to save settings.";
       toast.error(msg, { position: "top-right" });
-    } finally {
-      setSaving(false);
-    }
+    },
+  });
+
+  const onSubmit = (data: SettingsInput) => {
+    mutation.mutate(data);
   };
 
   // Watch form values and compare with initial settings to determine
@@ -199,10 +202,10 @@ const SettingsSection = ({
         {hasChanged && (
           <Button
             type="submit"
-            disabled={saving}
+            disabled={mutation.isPending}
             className="self-end bg-brand-blue hover:bg-brand-hover-blue text-white font-semibold px-6 gap-1.5"
           >
-            {saving && <Spinner className="size-4" />}
+            {mutation.isPending && <Spinner className="size-4" />}
             Save Settings
           </Button>
         )}
