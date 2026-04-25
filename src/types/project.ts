@@ -15,6 +15,7 @@ export interface UsageStats {
 }
 
 export interface Project {
+  _id: string;
   id: string;
   userId: string;
   name: string;

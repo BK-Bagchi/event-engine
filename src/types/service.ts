@@ -1,6 +1,7 @@
 import type { Project } from "./project";
 
 export interface Service {
+  _id: string;
   id: string;
   userId: string;
   projectId: string;
