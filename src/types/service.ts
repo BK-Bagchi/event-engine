@@ -4,6 +4,7 @@ export interface Service {
   _id: string;
   id: string;
   userId: string;
+  project: Project;
   projectId: string;
   name: string;
   providerType: string;
@@ -12,6 +13,3 @@ export interface Service {
   createdAt: string;
   updatedAt: string;
 }
-export type ServiceWithProject = Omit<Service, "projectId"> & {
-  project: Project;
-};
