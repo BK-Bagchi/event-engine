@@ -122,9 +122,7 @@ const Services = ({ projectId }: { projectId: string }) => {
                   size="sm"
                   variant="outline"
                   onClick={() =>
-                    navigate(
-                      `/dashboard/projects/${projectId}/services/${service.id}`,
-                    )
+                    navigate(`/dashboard/services/${projectId}/${service.id}`)
                   }
                   className="border-[#2A3550] bg-[#2a344b] hover:bg-[#2A3550] text-white text-xs"
                 >
