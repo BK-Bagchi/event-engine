@@ -8,6 +8,7 @@ import NotFound from "@/components/NotFound/NotFound";
 import Projects from "@/pages/Dashboard/Projects";
 import ProjectIndex from "@/features/projects/Index";
 import Services from "@/pages/Dashboard/Services";
+import ServiceIndex from "@/features/services/Index";
 
 const AppRouter = () => {
   return (
@@ -25,6 +26,8 @@ const AppRouter = () => {
             <Route path="projects" element={<Projects />} />
             <Route path="projects/:id" element={<ProjectIndex />} />
             <Route path="services" element={<Services />} />
+            {/* prettier-ignore */}
+            <Route path="services/:projectId/:serviceId" element={<ServiceIndex />} />
           </Route>
         </Route>
 
