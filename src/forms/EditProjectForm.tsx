@@ -12,6 +12,7 @@ import { editProjectSchema, type EditProjectInput } from "@/validation/project";
 import { ProjectAPI } from "@/api";
 import { getErrorMessage } from "@/utils/error";
 import type { Project } from "@/types/project";
+import Mandatory from "@/components/form/Mandatory";
 
 interface EditProjectFormProps {
   project: Project;
@@ -67,7 +68,7 @@ export const EditProjectForm = ({
       {/* Name */}
       <div className="flex flex-col gap-1.5">
         <Label htmlFor="edit-project-name" className="text-zinc-300">
-          Project Name <span className="text-red-400">*</span>
+          Project Name <Mandatory />
         </Label>
         <Input
           id="edit-project-name"

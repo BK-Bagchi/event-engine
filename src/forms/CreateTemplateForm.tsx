@@ -16,6 +16,7 @@ import { createTemplateSchema, TEMPLATE_CATEGORIES, type CreateTemplateInput } f
 import { TemplateAPI } from "@/api";
 import { useAllProjects } from "@/hooks/queries/project";
 import { useProjectServices } from "@/hooks/queries/service";
+import Mandatory from "@/components/form/Mandatory";
 
 const CATEGORY_LABELS: Record<string, string> = {
   CONTACT: "Contact",
@@ -104,7 +105,7 @@ export const CreateTemplateForm = ({ onCancel }: CreateTemplateFormProps) => {
           htmlFor="template-project"
           className="text-zinc-300 text-sm flex items-center gap-2"
         >
-          Project <span className="text-sm text-red-400">*</span>
+          Project <Mandatory />
           {loadingProjects && <Spinner className="size-3.5" />}
         </Label>
         <Controller
@@ -145,7 +146,7 @@ export const CreateTemplateForm = ({ onCancel }: CreateTemplateFormProps) => {
           htmlFor="template-service"
           className="text-zinc-300 text-sm flex items-center gap-2"
         >
-          Service <span className="text-sm text-red-400">*</span>
+          Service <Mandatory />
           {loadingServices && <Spinner className="size-3.5" />}
         </Label>
         <Controller
@@ -191,7 +192,7 @@ export const CreateTemplateForm = ({ onCancel }: CreateTemplateFormProps) => {
       {/* Name */}
       <div className="flex flex-col gap-1.5">
         <Label htmlFor="template-name" className="text-zinc-300 text-sm">
-          Template Name <span className="text-sm text-red-400">*</span>
+          Template Name <Mandatory />
         </Label>
         <Input
           id="template-name"
@@ -205,7 +206,7 @@ export const CreateTemplateForm = ({ onCancel }: CreateTemplateFormProps) => {
       {/* Category */}
       <div className="flex flex-col gap-1.5">
         <Label htmlFor="template-category" className="text-zinc-300 text-sm">
-          Category <span className="text-sm text-red-400">*</span>
+          Category <Mandatory />
         </Label>
         <Controller
           name="category"

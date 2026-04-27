@@ -15,6 +15,7 @@ import FormError from "@/components/form/FormError";
 import { getErrorMessage } from "@/utils/error";
 import { ServiceAPI } from "@/api";
 import type { Service } from "@/types/service";
+import Mandatory from "@/components/form/Mandatory";
 
 interface EditServiceFormProps {
   projectId: string;
@@ -79,7 +80,7 @@ export const EditServiceForm = ({
       {/* Name */}
       <div className="flex flex-col gap-1.5">
         <Label htmlFor="edit-service-name" className="text-zinc-300 text-sm">
-          Service Name <span className="text-red-400">*</span>
+          Service Name <Mandatory />
         </Label>
         <Input
           id="edit-service-name"
@@ -94,7 +95,7 @@ export const EditServiceForm = ({
       {/* Provider Type */}
       <div className="flex flex-col gap-1.5">
         <Label htmlFor="edit-provider-type" className="text-zinc-300 text-sm">
-          Provider Type <span className="text-red-400">*</span>
+          Provider Type <Mandatory />
         </Label>
         <Controller
           name="providerType"

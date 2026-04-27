@@ -1,3 +1,4 @@
+import { toast } from "sonner";
 import { Plus, Trash2 } from "lucide-react";
 import { useForm, useFieldArray, Controller } from "react-hook-form";
 import { useMutation } from "@tanstack/react-query";
@@ -13,7 +14,7 @@ import { Spinner } from "@/components/ui/spinner";
 import FormError from "@/components/form/FormError";
 import { ProjectAPI } from "@/api";
 import { getErrorMessage } from "@/utils/error";
-import { toast } from "sonner";
+import Mandatory from "@/components/form/Mandatory";
 
 interface CreateProjectFormProps {
   fetchProjects: () => Promise<void>;
@@ -92,7 +93,7 @@ export const CreateProjectForm = ({
         {/* Name */}
         <div className="flex flex-col gap-1.5">
           <Label htmlFor="project-name" className="text-zinc-300">
-            Project Name <span className="text-sm text-red-400">*</span>
+            Project Name <Mandatory />
           </Label>
           <Input
             id="project-name"
@@ -124,7 +125,7 @@ export const CreateProjectForm = ({
       <section className="flex flex-col gap-4">
         <div className="flex items-center justify-between">
           <h3 className="text-sm font-semibold text-zinc-200">
-            Allowed Origins <span className="text-sm text-red-400">*</span>
+            Allowed Origins <Mandatory />
           </h3>
           <button
             type="button"
@@ -172,7 +173,7 @@ export const CreateProjectForm = ({
       {/* ── Part 3: Settings ── */}
       <section className="flex flex-col gap-4">
         <h3 className="text-sm font-semibold text-zinc-200">
-          Settings <span className="text-sm text-red-400">*</span>
+          Settings <Mandatory />
         </h3>
 
         {/* Boolean Settings */}
@@ -267,8 +268,7 @@ export const CreateProjectForm = ({
           {/* Rate Limit */}
           <div className="flex flex-col gap-1.5">
             <Label htmlFor="rate-limit" className="text-zinc-300 text-xs">
-              Rate Limit (req/min){" "}
-              <span className="text-sm text-red-400">*</span>
+              Rate Limit (req/min) <Mandatory />
             </Label>
             <Input
               id="rate-limit"
@@ -286,8 +286,7 @@ export const CreateProjectForm = ({
           {/* Max Attachment Size */}
           <div className="flex flex-col gap-1.5">
             <Label htmlFor="max-attachment" className="text-zinc-300 text-xs">
-              Max Attachment (MB){" "}
-              <span className="text-sm text-red-400">*</span>
+              Max Attachment (MB) <Mandatory />
             </Label>
             <Input
               id="max-attachment"

@@ -15,6 +15,7 @@ import FormError from "@/components/form/FormError";
 import { getErrorMessage } from "@/utils/error";
 import { ServiceAPI } from "@/api";
 import { useAllProjects } from "@/hooks/queries/project";
+import Mandatory from "@/components/form/Mandatory";
 
 interface CreateServiceFormProps {
   fetchServices: () => void;
@@ -83,7 +84,7 @@ export const CreateServiceForm = ({
           htmlFor="service-project"
           className="text-zinc-300 text-sm flex items-center gap-2"
         >
-          Project <span className="text-sm text-red-400">*</span>
+          Project <Mandatory />
           {loadingProjects && <Spinner className="size-3.5" />}
         </Label>
         <Controller
@@ -121,7 +122,7 @@ export const CreateServiceForm = ({
       {/* Name */}
       <div className="flex flex-col gap-1.5">
         <Label htmlFor="service-name" className="text-zinc-300 text-sm">
-          Service Name <span className="text-sm text-red-400">*</span>
+          Service Name <Mandatory />
         </Label>
         <Input
           id="service-name"
@@ -135,7 +136,7 @@ export const CreateServiceForm = ({
       {/* Provider Type */}
       <div className="flex flex-col gap-1.5">
         <Label htmlFor="provider-type" className="text-zinc-300 text-sm">
-          Provider Type <span className="text-sm text-red-400">*</span>
+          Provider Type <Mandatory />
         </Label>
         <Controller
           name="providerType"
