@@ -9,13 +9,14 @@ import Projects from "@/pages/Dashboard/Projects";
 import ProjectIndex from "@/features/projects/Index";
 import Services from "@/pages/Dashboard/Services";
 import ServiceIndex from "@/features/services/Index";
+import Templates from "@/pages/Dashboard/Templates";
 
 const AppRouter = () => {
   return (
     <Routes>
       {/* Public routes */}
       <Route path="/" element={<DefaultLayout />}>
-        <Route index element={<Navigate to="/auth" />} />
+        <Route index element={<Navigate to="/dashboard" />} />
         <Route path="auth" element={<Auth />} />
 
         {/* Protected routes */}
@@ -28,6 +29,7 @@ const AppRouter = () => {
             <Route path="services" element={<Services />} />
             {/* prettier-ignore */}
             <Route path="services/:projectId/:serviceId" element={<ServiceIndex />} />
+            <Route path="templates" element={<Templates />} />
           </Route>
         </Route>
 
