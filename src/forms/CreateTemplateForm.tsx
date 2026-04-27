@@ -1,6 +1,5 @@
-import { useEffect } from "react";
 import { Controller, useForm, useWatch } from "react-hook-form";
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { toast } from "sonner";
 import { Input } from "@/components/ui/input";
@@ -14,9 +13,9 @@ import FormError from "@/components/form/FormError";
 import { getErrorMessage } from "@/utils/error";
 //prettier-ignore
 import { createTemplateSchema, TEMPLATE_CATEGORIES, type CreateTemplateInput } from "@/validation/template";
-import type { Project } from "@/types/project";
-import type { Service } from "@/types/service";
-import { ProjectAPI, ServiceAPI, TemplateAPI } from "@/api";
+import { TemplateAPI } from "@/api";
+import { useAllProjects } from "@/hooks/queries/project";
+import { useProjectServices } from "@/hooks/queries/service";
 
 const CATEGORY_LABELS: Record<string, string> = {
   CONTACT: "Contact",
@@ -53,50 +52,10 @@ export const CreateTemplateForm = ({ onCancel }: CreateTemplateFormProps) => {
 
   const selectedProjectId = useWatch({ control, name: "projectId" });
 
-  // ── Fetch projects ────────────────────────────────────────
-  const {
-    data: projects = [],
-    isLoading: loadingProjects,
-    isError: projectsError,
-    error: projectsFetchError,
-  } = useQuery<Project[]>({
-    queryKey: ["projects"],
-    queryFn: async () => {
-      const res = await ProjectAPI.getAllProjects();
-      return res.data.data;
-    },
+  const { projects, loadingProjects } = useAllProjects();
+  const { services, loadingServices } = useProjectServices({
+    projectId: selectedProjectId,
   });
-
-  useEffect(() => {
-    if (projectsError) {
-      const msg =
-        getErrorMessage(projectsFetchError) || "Failed to load projects.";
-      toast.error(msg, { position: "top-right" });
-    }
-  }, [projectsError, projectsFetchError]);
-
-  // ── Fetch services for selected project ──────────────────
-  const {
-    data: filteredServices = [],
-    isLoading: loadingServices,
-    isError: servicesError,
-    error: servicesFetchError,
-  } = useQuery<Service[]>({
-    queryKey: ["services", selectedProjectId],
-    queryFn: async () => {
-      const res = await ServiceAPI.getProjectServices(selectedProjectId);
-      return res.data.data;
-    },
-    enabled: !!selectedProjectId,
-  });
-
-  useEffect(() => {
-    if (servicesError) {
-      const msg =
-        getErrorMessage(servicesFetchError) || "Failed to load services.";
-      toast.error(msg, { position: "top-right" });
-    }
-  }, [servicesError, servicesFetchError]);
 
   // ── Create mutation ───────────────────────────────────────
   const mutation = useMutation({
@@ -205,7 +164,7 @@ export const CreateTemplateForm = ({ onCancel }: CreateTemplateFormProps) => {
                 <SelectValue
                   placeholder={
                     selectedProjectId
-                      ? filteredServices.length === 0
+                      ? services.length === 0
                         ? "No services for this project"
                         : "Select a service"
                       : "Select a service"
@@ -213,7 +172,7 @@ export const CreateTemplateForm = ({ onCancel }: CreateTemplateFormProps) => {
                 />
               </SelectTrigger>
               <SelectContent className="bg-[#1A2235] border-[#2A3550] text-zinc-100">
-                {filteredServices.map((s) => (
+                {services.map((s) => (
                   <SelectItem
                     key={s.id}
                     value={s.id}

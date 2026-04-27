@@ -1,5 +1,5 @@
 import { Controller, useForm } from "react-hook-form";
-import { useQuery, useMutation } from "@tanstack/react-query";
+import { useMutation } from "@tanstack/react-query";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { toast } from "sonner";
 import { Input } from "@/components/ui/input";
@@ -13,9 +13,8 @@ import { createServiceSchema, PROVIDER_TYPES, type CreateServiceInput } from "@/
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import FormError from "@/components/form/FormError";
 import { getErrorMessage } from "@/utils/error";
-import type { Project } from "@/types/project";
-import { ProjectAPI, ServiceAPI } from "@/api";
-import { useEffect } from "react";
+import { ServiceAPI } from "@/api";
+import { useAllProjects } from "@/hooks/queries/project";
 
 interface CreateServiceFormProps {
   fetchServices: () => void;
@@ -26,25 +25,7 @@ export const CreateServiceForm = ({
   fetchServices,
   onCancel,
 }: CreateServiceFormProps) => {
-  const {
-    data: projects = [],
-    isLoading: loadingProjects,
-    isError,
-    error,
-  } = useQuery<Project[]>({
-    queryKey: ["projects"],
-    queryFn: async () => {
-      const res = await ProjectAPI.getAllProjects();
-      return res.data.data;
-    },
-  });
-
-  useEffect(() => {
-    if (isError) {
-      const msg = getErrorMessage(error) || "Failed to load projects.";
-      toast.error(msg, { position: "top-right" });
-    }
-  }, [isError, error]);
+  const { projects, loadingProjects } = useAllProjects();
 
   const {
     register,
