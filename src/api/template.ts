@@ -44,7 +44,11 @@ export const createTemplate = (
   projectId: string,
   serviceId: string,
   data: { name: string; description?: string; category?: TemplateCategory },
-) => axios.post(`/projects/${projectId}/services/${serviceId}/templates`, data);
+) =>
+  axios.post(
+    `/template/projects/${projectId}/services/${serviceId}/templates`,
+    data,
+  );
 
 /** GET /template/projects/:projectId/templates */
 export const getProjectTemplates = (projectId: string) =>

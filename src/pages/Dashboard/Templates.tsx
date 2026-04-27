@@ -62,9 +62,6 @@ const CategoryBadge = ({ category }: { category: string }) => {
   );
 };
 
-// ── Template card skeleton ────────────────────────────────────
-const TemplateCardSkeleton = () => <CardSkeleton />;
-
 // ── Main component ────────────────────────────────────────────
 const Templates = () => {
   const navigate = useNavigate();
@@ -128,7 +125,7 @@ const Templates = () => {
         {isLoading ? (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
             {Array.from({ length: 3 }).map((_, i) => (
-              <TemplateCardSkeleton key={i} />
+              <CardSkeleton key={i} />
             ))}
           </div>
         ) : templates.length === 0 ? (
@@ -194,13 +191,13 @@ const Templates = () => {
                   <div className="flex items-center gap-3 text-xs text-zinc-500 mt-1">
                     <span className="flex items-center gap-1">
                       <FolderOpen size={11} />
-                      <span className="truncate max-w-24">
+                      <span className="truncate max-w-34">
                         {template.project?.name ?? "—"}
                       </span>
                     </span>
                     <span className="flex items-center gap-1">
                       <Layers size={11} />
-                      <span className="truncate max-w-24">
+                      <span className="truncate max-w-34">
                         {template.service?.name ?? "—"}
                       </span>
                     </span>

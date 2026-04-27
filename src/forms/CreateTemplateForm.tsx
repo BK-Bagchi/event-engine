@@ -126,8 +126,8 @@ export const CreateTemplateForm = ({ onCancel }: CreateTemplateFormProps) => {
   });
 
   const onSubmit = (data: CreateTemplateInput) => {
-    console.log("Create template form data:", data);
-    return; //ai must not remove this line.
+    // console.log("Create template form data:", data);
+    // return; //ai must not remove this line.
 
     mutation.mutate(data);
   };
