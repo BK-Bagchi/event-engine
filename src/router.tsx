@@ -10,6 +10,7 @@ import ProjectIndex from "@/features/projects/Index";
 import Services from "@/pages/Dashboard/Services";
 import ServiceIndex from "@/features/services/Index";
 import Templates from "@/pages/Dashboard/Templates";
+import TemplateIndex from "@/features/templates/Index";
 
 const AppRouter = () => {
   return (
@@ -30,6 +31,8 @@ const AppRouter = () => {
             {/* prettier-ignore */}
             <Route path="services/:projectId/:serviceId" element={<ServiceIndex />} />
             <Route path="templates" element={<Templates />} />
+            {/* prettier-ignore */}
+            <Route path="templates/:projectId/:templateId" element={<TemplateIndex />} />
           </Route>
         </Route>
 
