@@ -59,6 +59,13 @@ export const getTemplate = (projectId: string, templateId: string) =>
   axios.get(`${base(projectId)}/${templateId}`);
 
 /** PATCH /template/projects/:projectId/templates/:templateId/status */
+export const updateTemplateCategory = (
+  projectId: string,
+  templateId: string,
+  data: { category: TemplateCategory },
+) => axios.patch(`${base(projectId)}/${templateId}/category`, data);
+
+/** PATCH /template/projects/:projectId/templates/:templateId/status */
 export const updateTemplateStatus = (
   projectId: string,
   templateId: string,
