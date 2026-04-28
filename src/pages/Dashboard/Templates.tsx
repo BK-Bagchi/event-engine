@@ -1,7 +1,5 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { useQuery } from "@tanstack/react-query";
-import { toast } from "sonner";
 //prettier-ignore
 import { FileText, Activity, Tag, FolderOpen, Layers, Plus } from "lucide-react";
 //prettier-ignore
@@ -11,15 +9,13 @@ import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 //prettier-ignore
 import { Empty, EmptyHeader, EmptyMedia, EmptyTitle, EmptyDescription } from "@/components/ui/empty";
-import { TemplateAPI } from "@/api";
-import { getErrorMessage } from "@/utils/error";
 import ProjectPreviewDrawer from "@/components/drawer/ProjectPreview";
 import ServicePreviewDrawer from "@/components/drawer/ServicePreview";
 import { CreateTemplateForm } from "@/forms/CreateTemplateForm";
-import type { Template } from "@/types/template";
 import type { Project } from "@/types/project";
 import type { Service } from "@/types/service";
 import CardSkeleton from "@/components/skeleton/CardSkeleton";
+import { useAllTemplates } from "@/hooks/queries/template";
 
 // ── Status badge ──────────────────────────────────────────────
 const statusStyles: Record<string, string> = {
@@ -71,25 +67,7 @@ const Templates = () => {
   const [serviceDrawerOpen, setServiceDrawerOpen] = useState(false);
   const [dialogOpen, setDialogOpen] = useState(false);
 
-  const {
-    data: templates = [],
-    isLoading,
-    isError,
-    error,
-  } = useQuery<Template[]>({
-    queryKey: ["templates"],
-    queryFn: async () => {
-      const res = await TemplateAPI.getAllTemplates();
-      return res.data.data;
-    },
-  });
-
-  useEffect(() => {
-    if (isError) {
-      const msg = getErrorMessage(error) || "Failed to load templates.";
-      toast.error(msg, { position: "top-right" });
-    }
-  }, [isError, error]);
+  const { templates, loadingTemplates: isLoading } = useAllTemplates();
 
   const openProjectPreview = (project: Project) => {
     setSelectedProject(project);
@@ -211,7 +189,7 @@ const Templates = () => {
                     className="h-7 text-xs bg-transparent border-[#2A3550] text-zinc-300 hover:bg-[#2A3550] hover:text-white"
                     onClick={() =>
                       navigate(
-                        `/dashboard/templates/${template.projectId}/${template.serviceId}`,
+                        `/dashboard/templates/${template.project._id}/${template.id}`,
                       )
                     }
                   >
