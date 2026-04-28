@@ -1,11 +1,17 @@
-import { Pencil } from "lucide-react";
-import type { Template } from "@/types/template";
+import { useState } from "react";
+import { Pencil, Plus, Trash2 } from "lucide-react";
+import type { Template, TemplateVariable } from "@/types/template";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
+//prettier-ignore
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import BackButton from "@/components/button/BackButton";
+import { AddVariableForm } from "@/forms/AddVariableForm";
+import { EditVariableForm } from "@/forms/EditVariableForm";
+import DeleteVariableAlert from "@/alerts/DeleteVariableAlert";
 
 interface BodyProps {
   template: Template | null;
@@ -56,6 +62,16 @@ const BodySkeleton = () => (
 );
 
 const Body = ({ template, loadingTemplate }: BodyProps) => {
+  const [addDialogOpen, setAddDialogOpen] = useState(false);
+  const [editTarget, setEditTarget] = useState<{
+    variable: TemplateVariable;
+    index: number;
+  } | null>(null);
+  const [deleteTarget, setDeleteTarget] = useState<{
+    variable: TemplateVariable;
+    index: number;
+  } | null>(null);
+
   if (loadingTemplate) return <BodySkeleton />;
 
   if (!template)
@@ -66,96 +82,175 @@ const Body = ({ template, loadingTemplate }: BodyProps) => {
     );
 
   return (
-    <div className="max-w-6xl mx-auto flex flex-col gap-6">
-      {/* Back button */}
-      <BackButton to="/dashboard/templates" text="Back to Templates" />
+    <>
+      <div className="max-w-6xl mx-auto flex flex-col gap-6">
+        {/* Back button */}
+        <BackButton to="/dashboard/templates" text="Back to Templates" />
 
-      {/* Variables */}
-      <section className="rounded-xl border border-[#2A3550] bg-[#1A2235] p-6">
-        <div className="flex items-center justify-between mb-4">
-          <h3 className="text-sm font-semibold text-zinc-300">Variables</h3>
-          {template.variables?.length > 0 && (
-            <p className="text-[11px] text-zinc-600">
-              Use{" "}
-              <span className="font-mono text-zinc-500">
-                &#123;&#123;key&#125;&#125;
-              </span>{" "}
-              in templates to insert variable values.
+        {/* Variables */}
+        <section className="rounded-xl border border-[#2A3550] bg-[#1A2235] p-6">
+          <div className="flex items-center justify-between mb-4">
+            <h3 className="text-sm font-semibold text-zinc-300">Variables</h3>
+            <div className="flex items-center gap-3">
+              {template.variables?.length > 0 && (
+                <p className="text-[11px] text-zinc-600">
+                  Use{" "}
+                  <span className="font-mono text-zinc-500">
+                    &#123;&#123;key&#125;&#125;
+                  </span>{" "}
+                  in templates to insert variable values.
+                </p>
+              )}
+              <Button
+                size="sm"
+                variant="outline"
+                onClick={() => setAddDialogOpen(true)}
+                className="border-[#2A3550] text-zinc-800 hover:bg-[#2A3550] hover:text-white gap-1.5"
+              >
+                <Plus size={13} />
+                Add Variable
+              </Button>
+            </div>
+          </div>
+          {template.variables?.length > 0 ? (
+            <ul className="flex gap-2">
+              {template.variables.map((variable, idx) => (
+                <li
+                  key={idx}
+                  className="w-fit flex items-center justify-between rounded-lg border border-[#2A3550] bg-[#0B1120] px-4 py-2.5"
+                >
+                  <span className="font-mono text-sm text-zinc-300">
+                    &#123;&#123;{variable.key}&#125;&#125;
+                  </span>
+                  <div className="flex items-center gap-1">
+                    <Button
+                      size="sm"
+                      variant="ghost"
+                      onClick={() => setEditTarget({ variable, index: idx })}
+                      className="h-7 w-7 p-0 text-zinc-400 hover:text-zinc-200 hover:bg-[#2A3550]"
+                    >
+                      <Pencil size={13} />
+                    </Button>
+                    <Button
+                      size="sm"
+                      variant="ghost"
+                      onClick={() => setDeleteTarget({ variable, index: idx })}
+                      className="h-7 w-7 p-0 text-zinc-400 hover:text-red-400 hover:bg-[#2A3550]"
+                    >
+                      <Trash2 size={13} />
+                    </Button>
+                  </div>
+                </li>
+              ))}
+            </ul>
+          ) : (
+            <p className="text-sm text-zinc-600 italic">
+              No variables defined.
             </p>
           )}
-        </div>
-        {template.variables?.length > 0 ? (
-          <ul className="flex flex-col gap-2">
-            {template.variables.map((variable, idx) => (
-              <li
-                key={idx}
-                className="flex items-center justify-between rounded-lg border border-[#2A3550] bg-[#0B1120] px-4 py-2.5"
-              >
-                <span className="font-mono text-sm text-zinc-300">
-                  {variable.key}
-                </span>
-                <Button
-                  size="sm"
-                  variant="outline"
-                  className="border-[#2A3550] text-zinc-300 hover:bg-[#2A3550] hover:text-white gap-1.5"
-                >
-                  <Pencil size={12} />
-                  Edit
-                </Button>
-              </li>
-            ))}
-          </ul>
-        ) : (
-          <p className="text-sm text-zinc-600 italic">No variables defined.</p>
-        )}
-      </section>
+        </section>
 
-      <section className="rounded-xl border border-[#2A3550] bg-[#1A2235] p-6 flex flex-col gap-6">
-        {/* Subject Template */}
-        <div className="flex flex-col gap-1.5">
-          <Label className="text-zinc-300 text-sm">Subject Template</Label>
-          <p className="text-[11px] text-zinc-600">
-            The subject line of the email.
-          </p>
-          <Input
-            readOnly
-            value={template.subjectTemplate ?? ""}
-            placeholder="e.g. New submission from {{name}}"
-            className="border-[#2A3550] bg-[#0B1120] text-zinc-300 placeholder:text-zinc-600"
-          />
-        </div>
+        <section className="rounded-xl border border-[#2A3550] bg-[#1A2235] p-6 flex flex-col gap-6">
+          {/* Subject Template */}
+          <div className="flex flex-col gap-1.5">
+            <Label className="text-zinc-300 text-sm">Subject Template</Label>
+            <p className="text-[11px] text-zinc-600">
+              The subject line of the email.
+            </p>
+            <Input
+              readOnly
+              value={template.subjectTemplate ?? ""}
+              placeholder="e.g. New submission from {{name}}"
+              className="border-[#2A3550] bg-[#0B1120] text-zinc-300 placeholder:text-zinc-600"
+            />
+          </div>
 
-        {/* HTML Template */}
-        <div className="flex flex-col gap-1.5">
-          <Label className="text-zinc-300 text-sm">HTML Template</Label>
-          <p className="text-[11px] text-zinc-600">
-            The HTML-formatted body of the email.
-          </p>
-          <Textarea
-            readOnly
-            value={template.htmlTemplate ?? ""}
-            placeholder="<p>Hello {{name}},</p>"
-            className="border-[#2A3550] bg-[#0B1120] text-zinc-300 placeholder:text-zinc-600 min-h-32"
-            style={{ resize: "both" }}
-          />
-        </div>
+          {/* HTML Template */}
+          <div className="flex flex-col gap-1.5">
+            <Label className="text-zinc-300 text-sm">HTML Template</Label>
+            <p className="text-[11px] text-zinc-600">
+              The HTML-formatted body of the email.
+            </p>
+            <Textarea
+              readOnly
+              value={template.htmlTemplate ?? ""}
+              placeholder="<p>Hello {{name}},</p>"
+              className="border-[#2A3550] bg-[#0B1120] text-zinc-300 placeholder:text-zinc-600 min-h-32"
+              style={{ resize: "both" }}
+            />
+          </div>
 
-        {/* Text Template */}
-        <div className="flex flex-col gap-1.5">
-          <Label className="text-zinc-300 text-sm">Text Template</Label>
-          <p className="text-[11px] text-zinc-600">
-            The plain-text fallback body of the email.
-          </p>
-          <Textarea
-            readOnly
-            value={template.textTemplate ?? ""}
-            placeholder="Hello {{name}}, ..."
-            className="border-[#2A3550] bg-[#0B1120] text-zinc-300 placeholder:text-zinc-600 min-h-32"
-            style={{ resize: "both" }}
+          {/* Text Template */}
+          <div className="flex flex-col gap-1.5">
+            <Label className="text-zinc-300 text-sm">Text Template</Label>
+            <p className="text-[11px] text-zinc-600">
+              The plain-text fallback body of the email.
+            </p>
+            <Textarea
+              readOnly
+              value={template.textTemplate ?? ""}
+              placeholder="Hello {{name}}, ..."
+              className="border-[#2A3550] bg-[#0B1120] text-zinc-300 placeholder:text-zinc-600 min-h-32"
+              style={{ resize: "both" }}
+            />
+          </div>
+        </section>
+      </div>
+
+      {/* ── Add Variable Dialog ─────────────────────────────── */}
+      <Dialog open={addDialogOpen} onOpenChange={setAddDialogOpen}>
+        <DialogContent className="bg-[#1A2235] border-[#2A3550] text-white max-w-lg max-h-[85vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle className="text-white">Add Variable</DialogTitle>
+          </DialogHeader>
+          <AddVariableForm
+            projectId={template.projectId}
+            templateId={template.id}
+            existingVariables={template.variables ?? []}
+            onClose={() => setAddDialogOpen(false)}
           />
-        </div>
-      </section>
-    </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* ── Edit Variable Dialog ────────────────────────────── */}
+      <Dialog
+        open={!!editTarget}
+        onOpenChange={(open) => {
+          if (!open) setEditTarget(null);
+        }}
+      >
+        <DialogContent className="bg-[#1A2235] border-[#2A3550] text-white max-w-lg max-h-[85vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle className="text-white">Edit Variable</DialogTitle>
+          </DialogHeader>
+          {editTarget && (
+            <EditVariableForm
+              projectId={template.projectId}
+              templateId={template.id}
+              variable={editTarget.variable}
+              variableIndex={editTarget.index}
+              allVariables={template.variables ?? []}
+              onClose={() => setEditTarget(null)}
+            />
+          )}
+        </DialogContent>
+      </Dialog>
+
+      {/* ── Delete Variable Alert ───────────────────────────── */}
+      {deleteTarget && (
+        <DeleteVariableAlert
+          open={!!deleteTarget}
+          onOpenChange={(open) => {
+            if (!open) setDeleteTarget(null);
+          }}
+          projectId={template.projectId}
+          templateId={template.id}
+          variable={deleteTarget.variable}
+          variableIndex={deleteTarget.index}
+          allVariables={template.variables ?? []}
+        />
+      )}
+    </>
   );
 };
 
