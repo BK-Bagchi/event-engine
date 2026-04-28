@@ -19,8 +19,8 @@ export type VariableType =
 export interface TemplateVariable {
   type: VariableType;
   key: string;
-  label: string;
-  required: boolean;
+  label?: string;
+  required?: boolean;
   placeholder?: string;
   defaultValue?: string;
   validation?: {
