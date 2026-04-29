@@ -1,14 +1,13 @@
 import { useEffect } from "react";
-import { useNavigate } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { toast } from "sonner";
-import { ArrowLeft } from "lucide-react";
 import { ServiceAPI } from "@/api";
 import { getErrorMessage } from "@/utils/error";
 import type { Service } from "@/types/service";
 import ProjectSection from "@/components/services/ProjectSection";
 import ServiceInfoSection from "@/components/services/ServiceInfoSection";
 import StatusSection from "@/components/services/StatusSection";
+import BackButton from "@/components/button/BackButton";
 
 // ── Skeleton placeholder ──────────────────────────────────────
 const Skeleton = ({ className }: { className?: string }) => (
@@ -22,8 +21,6 @@ const ServiceDetail = ({
   projectId: string;
   serviceId: string;
 }) => {
-  const navigate = useNavigate();
-
   const {
     data: service,
     isLoading,
@@ -68,13 +65,7 @@ const ServiceDetail = ({
     <div className="min-h-screen bg-[#0B1120] py-6">
       <div className="max-w-6xl mx-auto flex flex-col gap-6">
         {/* Back button */}
-        <button
-          onClick={() => navigate("/dashboard/services")}
-          className="flex items-center gap-1.5 text-sm text-zinc-400 hover:text-zinc-200 transition-colors w-fit"
-        >
-          <ArrowLeft size={14} />
-          Back to Services
-        </button>
+        <BackButton to="/dashboard/services" text="Back to Services" />
 
         {/* ── Section 1 — Assigned Project ─────────────────── */}
         <ProjectSection project={service.project} />
