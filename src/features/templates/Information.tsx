@@ -1,9 +1,14 @@
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { toast } from "sonner";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Spinner } from "@/components/ui/spinner";
 import BackButton from "@/components/button/BackButton";
 //prettier-ignore
 import type { Template, TemplateCategory, TemplateStatus } from "@/types/template";
 //prettier-ignore
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { TemplateAPI } from "@/api";
+import { getErrorMessage } from "@/utils/error";
 
 interface InformationProps {
   template: Template | null;
@@ -47,6 +52,50 @@ const InformationSkeleton = () => (
 );
 
 const Information = ({ template, loadingTemplate }: InformationProps) => {
+  const queryClient = useQueryClient();
+
+  const categoryMutation = useMutation({
+    mutationFn: (category: TemplateCategory) =>
+      TemplateAPI.updateTemplateCategory(template!.projectId, template!.id, {
+        category,
+      }),
+    onSuccess: (res) => {
+      queryClient.setQueryData<Template>(
+        ["template", template!.projectId, template!.id],
+        (old) => (old ? { ...old, ...res.data?.data } : old),
+      );
+      toast.success(res.data?.message ?? "Category updated", {
+        position: "top-right",
+      });
+    },
+    onError: (error) => {
+      toast.error(getErrorMessage(error) || "Failed to update category.", {
+        position: "top-right",
+      });
+    },
+  });
+
+  const statusMutation = useMutation({
+    mutationFn: (status: TemplateStatus) =>
+      TemplateAPI.updateTemplateStatus(template!.projectId, template!.id, {
+        status,
+      }),
+    onSuccess: (res) => {
+      queryClient.setQueryData<Template>(
+        ["template", template!.projectId, template!.id],
+        (old) => (old ? { ...old, ...res.data?.data } : old),
+      );
+      toast.success(res.data?.message ?? "Status updated", {
+        position: "top-right",
+      });
+    },
+    onError: (error) => {
+      toast.error(getErrorMessage(error) || "Failed to update status.", {
+        position: "top-right",
+      });
+    },
+  });
+
   if (loadingTemplate) return <InformationSkeleton />;
 
   if (!template)
@@ -77,9 +126,20 @@ const Information = ({ template, loadingTemplate }: InformationProps) => {
 
       {/* Section 2 — Category */}
       <section className="rounded-xl border border-[#2A3550] bg-[#1A2235] p-6">
-        <h3 className="text-sm font-medium text-zinc-400 mb-3">Category</h3>
-        <Select value={template.category} disabled>
-          <SelectTrigger className="w-44 border-[#2A3550] bg-[#0B1120] text-zinc-300 disabled:opacity-80">
+        <div className="flex items-center gap-2 mb-3">
+          <h3 className="text-sm font-medium text-zinc-400">Category</h3>
+          {categoryMutation.isPending && (
+            <Spinner className="size-3.5 text-zinc-500" />
+          )}
+        </div>
+        <Select
+          value={template.category}
+          disabled={categoryMutation.isPending}
+          onValueChange={(val) =>
+            categoryMutation.mutate(val as TemplateCategory)
+          }
+        >
+          <SelectTrigger className="w-44 border-[#2A3550] bg-[#0B1120] text-zinc-300 disabled:opacity-60">
             <SelectValue />
           </SelectTrigger>
           <SelectContent className="bg-[#1A2235] border-[#2A3550] text-zinc-300">
@@ -94,9 +154,18 @@ const Information = ({ template, loadingTemplate }: InformationProps) => {
 
       {/* Section 3 — Status */}
       <section className="rounded-xl border border-[#2A3550] bg-[#1A2235] p-6">
-        <h3 className="text-sm font-medium text-zinc-400 mb-3">Status</h3>
-        <Select value={template.status} disabled>
-          <SelectTrigger className="w-44 border-[#2A3550] bg-[#0B1120] text-zinc-300 disabled:opacity-80">
+        <div className="flex items-center gap-2 mb-3">
+          <h3 className="text-sm font-medium text-zinc-400">Status</h3>
+          {statusMutation.isPending && (
+            <Spinner className="size-3.5 text-zinc-500" />
+          )}
+        </div>
+        <Select
+          value={template.status}
+          disabled={statusMutation.isPending}
+          onValueChange={(val) => statusMutation.mutate(val as TemplateStatus)}
+        >
+          <SelectTrigger className="w-44 border-[#2A3550] bg-[#0B1120] text-zinc-300 disabled:opacity-60">
             <SelectValue />
           </SelectTrigger>
           <SelectContent className="bg-[#1A2235] border-[#2A3550] text-zinc-300">
