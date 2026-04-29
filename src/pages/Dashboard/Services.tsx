@@ -1,7 +1,5 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { useQuery } from "@tanstack/react-query";
-import { toast } from "sonner";
 //prettier-ignore
 import { Plus, Mail, Server, Zap, Send, Layers, Activity, Star, ServerCog } from "lucide-react";
 //prettier-ignore
@@ -11,13 +9,11 @@ import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 //prettier-ignore
 import { Empty, EmptyHeader, EmptyMedia, EmptyTitle, EmptyDescription } from "@/components/ui/empty";
-import { ServiceAPI } from "@/api";
-import { getErrorMessage } from "@/utils/error";
-import type { Service } from "@/types/service";
 import ProjectPreviewDrawer from "@/components/drawer/ProjectPreview";
 import type { Project } from "@/types/project";
 import { CreateServiceForm } from "@/forms/CreateServiceForm";
 import CardSkeleton from "@/components/skeleton/CardSkeleton";
+import { useAllServices } from "@/hooks/queries/service";
 
 // ── Provider config ───────────────────────────────────────────
 const providerConfig: Record<
@@ -109,26 +105,7 @@ const Services = () => {
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [dialogOpen, setDialogOpen] = useState(false);
 
-  const {
-    data: services = [],
-    isLoading,
-    isError,
-    error,
-    refetch,
-  } = useQuery<Service[]>({
-    queryKey: ["services"],
-    queryFn: async () => {
-      const res = await ServiceAPI.getAllServices();
-      return res.data.data;
-    },
-  });
-
-  useEffect(() => {
-    if (isError) {
-      const msg = getErrorMessage(error) || "Failed to load services.";
-      toast.error(msg, { position: "top-right" });
-    }
-  }, [isError, error]);
+  const { services, loadingServices, refetchServices } = useAllServices();
 
   const openProjectPreview = (project: Project) => {
     setSelectedProject(project);
@@ -155,7 +132,7 @@ const Services = () => {
       </div>
 
       {/* Grid */}
-      {isLoading ? (
+      {loadingServices ? (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
           {Array.from({ length: 3 }).map((_, i) => (
             <CardSkeleton key={i} />
@@ -268,7 +245,7 @@ const Services = () => {
           </DialogHeader>
           <CreateServiceForm
             fetchServices={() => {
-              refetch();
+              refetchServices();
             }}
             onCancel={() => setDialogOpen(false)}
           />

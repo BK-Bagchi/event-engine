@@ -1,11 +1,7 @@
-import { useState, useEffect } from "react";
-import { useQuery } from "@tanstack/react-query";
-import { toast } from "sonner";
+import { useState } from "react";
 import { Pencil, Calendar, Hash } from "lucide-react";
-import { ProjectAPI } from "@/api";
-import { getErrorMessage } from "@/utils/error";
-import type { Project as ProjectType } from "@/types/project";
 import { Button } from "@/components/ui/button";
+import { Skeleton } from "@/components/ui/skeleton";
 //prettier-ignore
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { EditProjectForm } from "@/forms/EditProjectForm";
@@ -15,46 +11,21 @@ import OriginsSection from "@/components/projects/OriginsSection";
 import SettingsSection from "@/components/projects/SettingsSection";
 import UsageStatsSection from "@/components/projects/UsageStatsSection";
 import BackButton from "@/components/button/BackButton";
-
-// ── Skeleton placeholder ──────────────────────────────────────
-const Skeleton = ({ className }: { className?: string }) => (
-  <div className={`animate-pulse rounded-md bg-[#2A3550]/60 ${className}`} />
-);
+import { useProject } from "@/hooks/queries/project";
 
 const Project = ({ projectId: id }: { projectId: string }) => {
   const [editDialogOpen, setEditDialogOpen] = useState(false);
 
-  const {
-    data: project,
-    isLoading,
-    isError,
-    error,
-  } = useQuery<ProjectType>({
-    queryKey: ["project", id],
-    queryFn: async () => {
-      const res = await ProjectAPI.getProject(id);
-      return res.data.data;
-    },
-  });
-
-  useEffect(() => {
-    if (isError) {
-      const msg = getErrorMessage(error) || "Failed to load project.";
-      toast.error(msg, { position: "top-right" });
-    }
-  }, [isError, error]);
+  const { project, loadingProject } = useProject({ projectId: id });
 
   // ── Loading skeleton ───────────────────────────────────────
-  if (isLoading) {
+  if (loadingProject) {
     return (
       <div className="min-h-screen bg-[#0B1120] py-6 flex flex-col gap-6 max-w-6xl mx-auto">
-        <Skeleton className="h-8 w-32" />
-        <Skeleton className="h-28 w-full" />
-        <Skeleton className="h-20 w-full" />
-        <Skeleton className="h-40 w-full" />
-        <Skeleton className="h-48 w-full" />
-        <Skeleton className="h-60 w-full" />
-        <Skeleton className="h-28 w-full" />
+        <Skeleton className="h-8 w-32 bg-[#2A3550]/60" />
+        {Array.from({ length: 6 }).map((_, i) => (
+          <Skeleton key={i} className="h-28 w-full bg-[#2A3550]/60" />
+        ))}
       </div>
     );
   }

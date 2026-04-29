@@ -1,7 +1,5 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { useQuery } from "@tanstack/react-query";
-import { toast } from "sonner";
 //prettier-ignore
 import { FolderOpen, Activity, BarChart2, Plus } from "lucide-react";
 //prettier-ignore
@@ -12,11 +10,10 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } f
 //prettier-ignore
 import { Empty, EmptyHeader, EmptyMedia, EmptyTitle, EmptyDescription } from "@/components/ui/empty";
 import { CreateProjectForm } from "@/forms/CreateProjectForm";
-import { ProjectAPI } from "@/api";
-import { getErrorMessage } from "@/utils/error";
 import ProjectPreviewDrawer from "@/components/drawer/ProjectPreview";
 import type { Project } from "@/types/project";
 import CardSkeleton from "@/components/skeleton/CardSkeleton";
+import { useAllProjects } from "@/hooks/queries/project";
 
 // ── Status badge ──────────────────────────────────────────────
 const statusStyles: Record<string, string> = {
@@ -41,27 +38,7 @@ const Projects = () => {
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [dialogOpen, setDialogOpen] = useState(false);
 
-  const {
-    data: projects = [],
-    isLoading,
-    isError,
-    error,
-    refetch,
-  } = useQuery<Project[]>({
-    queryKey: ["projects"],
-    queryFn: async () => {
-      const res = await ProjectAPI.getAllProjects();
-      return res.data.data;
-    },
-  });
-
-  // Show toast on error
-  useEffect(() => {
-    if (isError) {
-      const msg = getErrorMessage(error) || "Failed to load projects.";
-      toast.error(msg, { position: "top-right" });
-    }
-  }, [isError, error]);
+  const { projects, loadingProjects, refetchProjects } = useAllProjects();
 
   const openPreview = (project: Project) => {
     setSelectedProject(project);
@@ -92,7 +69,7 @@ const Projects = () => {
 
       <div className="flex flex-col gap-6">
         {/* Grid */}
-        {isLoading ? (
+        {loadingProjects ? (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
             {Array.from({ length: 3 }).map((_, i) => (
               <CardSkeleton key={i} />
@@ -200,7 +177,7 @@ const Projects = () => {
 
           <CreateProjectForm
             fetchProjects={async () => {
-              await refetch();
+              await refetchProjects();
             }}
             setDialogOpen={setDialogOpen}
             onCancel={() => setDialogOpen(false)}

@@ -1,11 +1,5 @@
-import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { useQuery } from "@tanstack/react-query";
-import { toast } from "sonner";
 import { ServerCog } from "lucide-react";
-import { ServiceAPI } from "@/api";
-import { getErrorMessage } from "@/utils/error";
-import type { Service } from "@/types/service";
 //prettier-ignore
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -14,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Empty, EmptyHeader, EmptyMedia, EmptyTitle, EmptyDescription } from "@/components/ui/empty";
 import CardSkeleton from "@/components/skeleton/CardSkeleton";
 import BackButton from "@/components/button/BackButton";
+import { useProjectServices } from "@/hooks/queries/service";
 
 // ── Status badge ──────────────────────────────────────────────
 const statusStyle: Record<string, string> = {
@@ -58,35 +53,17 @@ const EmptyState = () => (
 const Services = ({ projectId }: { projectId: string }) => {
   const navigate = useNavigate();
 
-  const {
-    data: services = [],
-    isLoading,
-    isError,
-    error,
-  } = useQuery<Service[]>({
-    queryKey: ["project-services", projectId],
-    queryFn: async () => {
-      const res = await ServiceAPI.getProjectServices(projectId);
-      return res.data.data;
-    },
-  });
-
-  useEffect(() => {
-    if (isError) {
-      const msg = getErrorMessage(error) || "Failed to load services.";
-      toast.error(msg, { position: "top-right" });
-    }
-  }, [isError, error]);
+  const { services, loadingServices } = useProjectServices({ projectId });
 
   return (
     <div className="flex flex-col gap-6 py-6">
-      {isLoading ? (
+      {loadingServices ? (
         <BackButtonSkeleton />
       ) : (
         <BackButton to="/dashboard/projects" text="Back to Projects" />
       )}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-        {isLoading ? (
+        {loadingServices ? (
           Array.from({ length: 3 }).map((_, i) => <CardSkeleton key={i} />)
         ) : services.length === 0 ? (
           <EmptyState />

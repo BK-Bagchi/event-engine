@@ -1,11 +1,5 @@
-import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { useQuery } from "@tanstack/react-query";
-import { toast } from "sonner";
 import { LayoutTemplate } from "lucide-react";
-import { TemplateAPI } from "@/api";
-import { getErrorMessage } from "@/utils/error";
-import type { Template } from "@/types/template";
 //prettier-ignore
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -14,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Empty, EmptyHeader, EmptyMedia, EmptyTitle, EmptyDescription } from "@/components/ui/empty";
 import CardSkeleton from "@/components/skeleton/CardSkeleton";
 import BackButton from "@/components/button/BackButton";
+import { useProjectTemplates } from "@/hooks/queries/template";
 
 // ── Skeleton for back button ──────────────────────────────────
 const BackButtonSkeleton = () => (
@@ -79,35 +74,17 @@ const EmptyState = () => (
 const Templates = ({ projectId }: { projectId: string }) => {
   const navigate = useNavigate();
 
-  const {
-    data: templates = [],
-    isLoading,
-    isError,
-    error,
-  } = useQuery<Template[]>({
-    queryKey: ["project-templates", projectId],
-    queryFn: async () => {
-      const res = await TemplateAPI.getProjectTemplates(projectId);
-      return res.data.data;
-    },
-  });
-
-  useEffect(() => {
-    if (isError) {
-      const msg = getErrorMessage(error) || "Failed to load templates.";
-      toast.error(msg, { position: "top-right" });
-    }
-  }, [isError, error]);
+  const { templates, loadingTemplates } = useProjectTemplates({ projectId });
 
   return (
     <div className="flex flex-col gap-6 py-6">
-      {isLoading ? (
+      {loadingTemplates ? (
         <BackButtonSkeleton />
       ) : (
         <BackButton to="/dashboard/projects" text="Back to Projects" />
       )}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-        {isLoading ? (
+        {loadingTemplates ? (
           Array.from({ length: 3 }).map((_, i) => <CardSkeleton key={i} />)
         ) : templates.length === 0 ? (
           <EmptyState />
@@ -140,7 +117,7 @@ const Templates = ({ projectId }: { projectId: string }) => {
                       `/dashboard/projects/${projectId}/templates/${template.id}`,
                     )
                   }
-                  className="border-[#2A3550] text-zinc-300 hover:bg-[#2A3550] hover:text-white text-xs"
+                  className="border-[#2A3550] text-zinc-800 hover:bg-[#2A3550] hover:text-white text-xs"
                 >
                   Details
                 </Button>

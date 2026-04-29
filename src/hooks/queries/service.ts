@@ -24,6 +24,7 @@ export const useAllServices = () => {
   return {
     services: query.data ?? [],
     loadingServices: query.isLoading,
+    refetchServices: query.refetch,
   };
 };
 

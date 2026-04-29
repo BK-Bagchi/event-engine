@@ -1,13 +1,8 @@
-import { useEffect } from "react";
-import { useQuery } from "@tanstack/react-query";
-import { toast } from "sonner";
-import { ServiceAPI } from "@/api";
-import { getErrorMessage } from "@/utils/error";
-import type { Service } from "@/types/service";
 import ProjectSection from "@/components/services/ProjectSection";
 import ServiceInfoSection from "@/components/services/ServiceInfoSection";
 import StatusSection from "@/components/services/StatusSection";
 import BackButton from "@/components/button/BackButton";
+import { useService } from "@/hooks/queries/service";
 
 // ── Skeleton placeholder ──────────────────────────────────────
 const Skeleton = ({ className }: { className?: string }) => (
@@ -21,28 +16,10 @@ const ServiceDetail = ({
   projectId: string;
   serviceId: string;
 }) => {
-  const {
-    data: service,
-    isLoading,
-    isError,
-    error,
-  } = useQuery<Service>({
-    queryKey: ["service", projectId, serviceId],
-    queryFn: async () => {
-      const res = await ServiceAPI.getService(projectId, serviceId);
-      return res.data.data;
-    },
-  });
-
-  useEffect(() => {
-    if (isError) {
-      const msg = getErrorMessage(error) || "Failed to load service.";
-      toast.error(msg, { position: "top-right" });
-    }
-  }, [isError, error]);
+  const { service, loadingService } = useService({ projectId, serviceId });
 
   // ── Loading skeleton ───────────────────────────────────────
-  if (isLoading) {
+  if (loadingService) {
     return (
       <div className="min-h-screen bg-[#0B1120] py-6 flex flex-col gap-6 max-w-6xl mx-auto">
         <Skeleton className="h-8 w-32" />
