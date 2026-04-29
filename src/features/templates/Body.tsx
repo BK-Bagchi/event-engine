@@ -1,14 +1,20 @@
-import { useState } from "react";
-import { Pencil, Plus, Trash2 } from "lucide-react";
+import { useState, useEffect, useRef } from "react";
+import { Pencil, Plus, Save, Trash2 } from "lucide-react";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { toast } from "sonner";
 import type { Template, TemplateVariable } from "@/types/template";
+import * as TemplateAPI from "@/api/template";
+import { htmlToText, textToHtml } from "@/utils/templateConversion";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
+import { Spinner } from "@/components/ui/spinner";
 //prettier-ignore
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { getErrorMessage } from "@/utils/error";
 import BackButton from "@/components/button/BackButton";
+import { TemplateBodyEditor } from "@/components/templates/TemplateBodyEditor";
 import { AddVariableForm } from "@/forms/AddVariableForm";
 import { EditVariableForm } from "@/forms/EditVariableForm";
 import DeleteVariableAlert from "@/alerts/DeleteVariableAlert";
@@ -72,6 +78,71 @@ const Body = ({ template, loadingTemplate }: BodyProps) => {
     index: number;
   } | null>(null);
 
+  // ── Body field state ──────────────────────────────────────────────────────
+  const [subjectValue, setSubjectValue] = useState("");
+  const [htmlValue, setHtmlValue] = useState("");
+  const [textValue, setTextValue] = useState("");
+  const [activeMode, setActiveMode] = useState<"html" | "text">("html");
+
+  const queryClient = useQueryClient();
+  const templateIdRef = useRef<string | undefined>(undefined);
+
+  // Sync local state only when the template ID changes (not on every re-render)
+  useEffect(() => {
+    if (!template || template.id === templateIdRef.current) return;
+    templateIdRef.current = template.id;
+    setSubjectValue(template.subjectTemplate ?? "");
+    setHtmlValue(template.htmlTemplate ?? "");
+    setTextValue(template.textTemplate ?? "");
+  }, [template]);
+
+  // Derived: has the user changed anything?
+  const isDirty = template
+    ? subjectValue !== (template.subjectTemplate ?? "") ||
+      htmlValue !== (template.htmlTemplate ?? "") ||
+      textValue !== (template.textTemplate ?? "")
+    : false;
+
+  const saveMutation = useMutation({
+    mutationFn: () =>
+      TemplateAPI.updateTemplateConfig(template!.projectId, template!.id, {
+        subjectTemplate: subjectValue,
+        htmlTemplate: htmlValue,
+        textTemplate: textValue,
+      }),
+    onSuccess: (res) => {
+      queryClient.invalidateQueries({
+        queryKey: ["template", template!.projectId, template!.id],
+      });
+      toast.success(res.data?.message ?? "Template body saved.", {
+        position: "top-right",
+      });
+    },
+    onError: (error) => {
+      const msg = getErrorMessage(error) || "Failed to save template body.";
+      toast.error(msg, { position: "top-right" });
+    },
+  });
+
+  // Conversion handlers
+  function handleHtmlChange(val: string) {
+    setHtmlValue(val);
+    setTextValue(htmlToText(val));
+  }
+
+  function handleTextChange(val: string) {
+    setTextValue(val);
+    setHtmlValue(textToHtml(val));
+  }
+
+  const onSubmit = () => {
+    //prettier-ignore
+    // console.log("Submitting with values:", { subjectValue, htmlValue, textValue });
+    // return; //ai must not remove this log and return statement, it's for debugging purposes. Remove it once verified.
+
+    saveMutation.mutate();
+  };
+
   if (loadingTemplate) return <BodySkeleton />;
 
   if (!template)
@@ -105,7 +176,7 @@ const Body = ({ template, loadingTemplate }: BodyProps) => {
                 size="sm"
                 variant="outline"
                 onClick={() => setAddDialogOpen(true)}
-                className="border-[#2A3550] text-zinc-800 hover:bg-[#2A3550] hover:text-white gap-1.5"
+                className="border-none bg-brand-blue hover:bg-brand-hover-blue text-white hover:text-white font-semibold flex items-center gap-2"
               >
                 <Plus size={13} />
                 Add Variable
@@ -150,7 +221,35 @@ const Body = ({ template, loadingTemplate }: BodyProps) => {
           )}
         </section>
 
+        {/* Body section */}
         <section className="rounded-xl border border-[#2A3550] bg-[#1A2235] p-6 flex flex-col gap-6">
+          {/* Section header + Save button */}
+          <div className="flex items-center justify-between">
+            <div>
+              <h3 className="text-sm font-semibold text-zinc-300">
+                Template Body
+              </h3>
+              <p className="text-[11px] text-zinc-600 mt-0.5">
+                Edit HTML or plain text — the other field is auto-derived.
+              </p>
+            </div>
+            {isDirty && (
+              <Button
+                size="sm"
+                onClick={onSubmit}
+                disabled={saveMutation.isPending}
+                className="gap-1.5 bg-blue-600 hover:bg-blue-700 text-white"
+              >
+                {saveMutation.isPending ? (
+                  <Spinner className="size-3.5" />
+                ) : (
+                  <Save size={13} />
+                )}
+                Save
+              </Button>
+            )}
+          </div>
+
           {/* Subject Template */}
           <div className="flex flex-col gap-1.5">
             <Label className="text-zinc-300 text-sm">Subject Template</Label>
@@ -158,42 +257,22 @@ const Body = ({ template, loadingTemplate }: BodyProps) => {
               The subject line of the email.
             </p>
             <Input
-              readOnly
-              value={template.subjectTemplate ?? ""}
+              value={subjectValue}
+              onChange={(e) => setSubjectValue(e.target.value)}
               placeholder="e.g. New submission from {{name}}"
               className="border-[#2A3550] bg-[#0B1120] text-zinc-300 placeholder:text-zinc-600"
             />
           </div>
 
-          {/* HTML Template */}
-          <div className="flex flex-col gap-1.5">
-            <Label className="text-zinc-300 text-sm">HTML Template</Label>
-            <p className="text-[11px] text-zinc-600">
-              The HTML-formatted body of the email.
-            </p>
-            <Textarea
-              readOnly
-              value={template.htmlTemplate ?? ""}
-              placeholder="<p>Hello {{name}},</p>"
-              className="border-[#2A3550] bg-[#0B1120] text-zinc-300 placeholder:text-zinc-600 min-h-32"
-              style={{ resize: "both" }}
-            />
-          </div>
-
-          {/* Text Template */}
-          <div className="flex flex-col gap-1.5">
-            <Label className="text-zinc-300 text-sm">Text Template</Label>
-            <p className="text-[11px] text-zinc-600">
-              The plain-text fallback body of the email.
-            </p>
-            <Textarea
-              readOnly
-              value={template.textTemplate ?? ""}
-              placeholder="Hello {{name}}, ..."
-              className="border-[#2A3550] bg-[#0B1120] text-zinc-300 placeholder:text-zinc-600 min-h-32"
-              style={{ resize: "both" }}
-            />
-          </div>
+          {/* Template Body Editor Component */}
+          <TemplateBodyEditor
+            htmlValue={htmlValue}
+            textValue={textValue}
+            activeMode={activeMode}
+            onHtmlChange={handleHtmlChange}
+            onTextChange={handleTextChange}
+            onModeChange={setActiveMode}
+          />
         </section>
       </div>
 
