@@ -50,6 +50,35 @@ export const useProjectTemplates = ({ projectId }: { projectId: string }) => {
   };
 };
 
+export const useServiceTemplates = ({
+  projectId,
+  serviceId,
+}: {
+  projectId: string;
+  serviceId: string;
+}) => {
+  const query = useQuery<Template[]>({
+    queryKey: ["templates", projectId, serviceId],
+    queryFn: async () => {
+      const res = await TemplateAPI.getServiceTemplates(projectId, serviceId);
+      return res.data.data;
+    },
+    enabled: !!projectId && !!serviceId,
+  });
+
+  useEffect(() => {
+    if (query.isError) {
+      const msg = getErrorMessage(query.error) || "Failed to load templates.";
+      toast.error(msg, { position: "top-right" });
+    }
+  }, [query.isError, query.error]);
+
+  return {
+    templates: query.data ?? [],
+    loadingTemplates: query.isLoading,
+  };
+};
+
 export const useTemplate = ({
   projectId,
   templateId,
