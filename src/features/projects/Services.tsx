@@ -2,7 +2,7 @@ import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { toast } from "sonner";
-import { ServerCog, ArrowLeft } from "lucide-react";
+import { ServerCog } from "lucide-react";
 import { ServiceAPI } from "@/api";
 import { getErrorMessage } from "@/utils/error";
 import type { Service } from "@/types/service";
@@ -13,6 +13,7 @@ import { Button } from "@/components/ui/button";
 //prettier-ignore
 import { Empty, EmptyHeader, EmptyMedia, EmptyTitle, EmptyDescription } from "@/components/ui/empty";
 import CardSkeleton from "@/components/skeleton/CardSkeleton";
+import BackButton from "@/components/button/BackButton";
 
 // ── Status badge ──────────────────────────────────────────────
 const statusStyle: Record<string, string> = {
@@ -82,13 +83,7 @@ const Services = ({ projectId }: { projectId: string }) => {
       {isLoading ? (
         <BackButtonSkeleton />
       ) : (
-        <button
-          onClick={() => navigate("/dashboard/projects")}
-          className="flex items-center gap-1.5 text-sm text-zinc-400 hover:text-zinc-200 transition-colors w-fit"
-        >
-          <ArrowLeft size={14} />
-          Back to Projects
-        </button>
+        <BackButton to="/dashboard/projects" text="Back to Projects" />
       )}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
         {isLoading ? (

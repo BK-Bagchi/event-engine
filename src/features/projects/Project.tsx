@@ -1,8 +1,7 @@
 import { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { toast } from "sonner";
-import { ArrowLeft, Pencil, Calendar, Hash } from "lucide-react";
+import { Pencil, Calendar, Hash } from "lucide-react";
 import { ProjectAPI } from "@/api";
 import { getErrorMessage } from "@/utils/error";
 import type { Project as ProjectType } from "@/types/project";
@@ -15,6 +14,7 @@ import KeysSection from "@/components/projects/KeysSection";
 import OriginsSection from "@/components/projects/OriginsSection";
 import SettingsSection from "@/components/projects/SettingsSection";
 import UsageStatsSection from "@/components/projects/UsageStatsSection";
+import BackButton from "@/components/button/BackButton";
 
 // ── Skeleton placeholder ──────────────────────────────────────
 const Skeleton = ({ className }: { className?: string }) => (
@@ -22,8 +22,6 @@ const Skeleton = ({ className }: { className?: string }) => (
 );
 
 const Project = ({ projectId: id }: { projectId: string }) => {
-  const navigate = useNavigate();
-
   const [editDialogOpen, setEditDialogOpen] = useState(false);
 
   const {
@@ -73,13 +71,7 @@ const Project = ({ projectId: id }: { projectId: string }) => {
     <div className="min-h-screen bg-[#0B1120] py-6">
       <div className="max-w-6xl mx-auto flex flex-col gap-6">
         {/* Back button */}
-        <button
-          onClick={() => navigate("/dashboard/projects")}
-          className="flex items-center gap-1.5 text-sm text-zinc-400 hover:text-zinc-200 transition-colors w-fit"
-        >
-          <ArrowLeft size={14} />
-          Back to Projects
-        </button>
+        <BackButton to="/dashboard/projects" text="Back to Projects" />
 
         {/* ── Section 1 — Info ─────────────────────────────── */}
         <section className="rounded-xl border border-[#2A3550] bg-[#1A2235] p-6">
