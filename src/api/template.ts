@@ -54,6 +54,10 @@ export const createTemplate = (
 export const getProjectTemplates = (projectId: string) =>
   axios.get(base(projectId));
 
+/** GET /template/projects/:projectId/services/:serviceId/templates */
+export const getServiceTemplates = (projectId: string, serviceId: string) =>
+  axios.get(`/template/projects/${projectId}/services/${serviceId}/templates`);
+
 /** GET /template/projects/:projectId/templates/:templateId */
 export const getTemplate = (projectId: string, templateId: string) =>
   axios.get(`${base(projectId)}/${templateId}`);
