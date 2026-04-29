@@ -71,5 +71,34 @@ export const variableSchema = z.object({
     .optional(),
 });
 
+const emailField = z
+  .string()
+  .min(1, "Email is required")
+  .email("Must be a valid email address");
+
+const emailEntrySchema = z.object({ value: emailField });
+const optionalEmailEntrySchema = z.object({
+  value: z.string(),
+});
+
+export const deliveryConfigSchema = z
+  .object({
+    to: z
+      .array(emailEntrySchema)
+      .min(1, "At least one recipient email is required"),
+    cc: z.array(optionalEmailEntrySchema),
+    bcc: z.array(optionalEmailEntrySchema),
+  })
+  .refine(
+    (data) =>
+      data.cc.some((e) => e.value.trim()) ||
+      data.bcc.some((e) => e.value.trim()),
+    {
+      message: "At least one CC or BCC email is required",
+      path: ["bcc"],
+    },
+  );
+
 export type CreateTemplateInput = z.infer<typeof createTemplateSchema>;
 export type VariableFormInput = z.infer<typeof variableSchema>;
+export type DeliveryConfigInput = z.infer<typeof deliveryConfigSchema>;
