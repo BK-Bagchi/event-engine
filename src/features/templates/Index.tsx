@@ -6,6 +6,7 @@ import { Empty, EmptyHeader, EmptyMedia, EmptyTitle, EmptyDescription } from "@/
 import Information from "@/features/templates/Information";
 import Body from "@/features/templates/Body";
 import Config from "@/features/templates/Config";
+import Workflow from "@/features/templates/Workflow";
 import { useTemplate } from "@/hooks/queries/template";
 
 const Index = () => {
@@ -47,6 +48,7 @@ const Index = () => {
             <TabsTrigger value="information">Information</TabsTrigger>
             <TabsTrigger value="body">Body</TabsTrigger>
             <TabsTrigger value="config">Config</TabsTrigger>
+            <TabsTrigger value="workflow">Work Flow</TabsTrigger>
           </TabsList>
           <div>
             <TabsContent value="information">
@@ -57,6 +59,9 @@ const Index = () => {
             </TabsContent>
             <TabsContent value="config">
               <Config {...{ template, loadingTemplate }} />
+            </TabsContent>
+            <TabsContent value="workflow">
+              <Workflow {...{ template, loadingTemplate }} />
             </TabsContent>
           </div>
         </Tabs>
