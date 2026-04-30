@@ -11,11 +11,8 @@ const base = (projectId: string, templateId: string) =>
   `/workflow/projects/${projectId}/templates/${templateId}/workflows`;
 
 /** POST /workflow/projects/:projectId/templates/:templateId/workflows */
-export const createWorkflow = (
-  projectId: string,
-  templateId: string,
-  data: { actions: { type: ActionType; enabled?: boolean }[] },
-) => axios.post(base(projectId, templateId), data);
+export const createWorkflow = (projectId: string, templateId: string) =>
+  axios.post(base(projectId, templateId));
 
 /** GET /workflow/projects/:projectId/workflows */
 export const getProjectWorkflows = (projectId: string) =>
@@ -31,6 +28,14 @@ export const getWorkflow = (
   templateId: string,
   workflowId: string,
 ) => axios.get(`${base(projectId, templateId)}/${workflowId}`);
+
+/** PATCH /workflow/projects/:projectId/templates/:templateId/workflows/:workflowId/actions */
+export const updateWorkflowActions = (
+  projectId: string,
+  templateId: string,
+  workflowId: string,
+  data: { actions: { type: ActionType; enabled: boolean }[] },
+) => axios.patch(`${base(projectId, templateId)}/${workflowId}/actions`, data);
 
 /** PATCH /workflow/projects/:projectId/templates/:templateId/workflows/:workflowId/status */
 export const updateWorkflowStatus = (
