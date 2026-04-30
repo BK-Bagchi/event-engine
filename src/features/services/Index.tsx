@@ -38,7 +38,7 @@ const Index = () => {
         <Tabs defaultValue="service" className="w-6xl mx-auto">
           <TabsList className="mb-6 w-100">
             <TabsTrigger value="service">Service</TabsTrigger>
-            <TabsTrigger value="template">Template</TabsTrigger>
+            <TabsTrigger value="template">Templates</TabsTrigger>
           </TabsList>
 
           <div>
