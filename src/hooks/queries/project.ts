@@ -46,6 +46,5 @@ export const useAllProjects = () => {
   return {
     projects: query.data ?? [],
     loadingProjects: query.isLoading,
-    refetchProjects: query.refetch,
   };
 };

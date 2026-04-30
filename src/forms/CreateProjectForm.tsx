@@ -1,7 +1,7 @@
 import { toast } from "sonner";
 import { Plus, Trash2 } from "lucide-react";
 import { useForm, useFieldArray, Controller } from "react-hook-form";
-import { useMutation } from "@tanstack/react-query";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { zodResolver } from "@hookform/resolvers/zod";
 //prettier-ignore
 import { createProjectSchema, type CreateProjectInput } from "@/validation/project";
@@ -17,20 +17,17 @@ import { getErrorMessage } from "@/utils/error";
 import Mandatory from "@/components/form/Mandatory";
 
 interface CreateProjectFormProps {
-  fetchProjects: () => Promise<void>;
-  setDialogOpen: React.Dispatch<React.SetStateAction<boolean>>;
   onCancel?: () => void;
 }
 
-export const CreateProjectForm = ({
-  setDialogOpen,
-  fetchProjects,
-  onCancel,
-}: CreateProjectFormProps) => {
+export const CreateProjectForm = ({ onCancel }: CreateProjectFormProps) => {
+  const queryClient = useQueryClient();
+
   const {
     register,
     handleSubmit,
     control,
+    reset,
     formState: { errors },
   } = useForm<CreateProjectInput>({
     resolver: zodResolver(createProjectSchema),
@@ -66,8 +63,9 @@ export const CreateProjectForm = ({
       toast.success(res.data?.message ?? "Project created successfully", {
         position: "top-right",
       });
-      setDialogOpen(false);
-      fetchProjects();
+      queryClient.invalidateQueries({ queryKey: ["projects"] });
+      reset();
+      onCancel?.();
     },
     onError: (error) => {
       const msg = getErrorMessage(error) || "Failed to create project.";

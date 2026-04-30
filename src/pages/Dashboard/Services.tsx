@@ -105,7 +105,7 @@ const Services = () => {
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [dialogOpen, setDialogOpen] = useState(false);
 
-  const { services, loadingServices, refetchServices } = useAllServices();
+  const { services, loadingServices } = useAllServices();
 
   const openProjectPreview = (project: Project) => {
     setSelectedProject(project);
@@ -243,12 +243,7 @@ const Services = () => {
               Configure a new email provider service for your project.
             </DialogDescription>
           </DialogHeader>
-          <CreateServiceForm
-            fetchServices={() => {
-              refetchServices();
-            }}
-            onCancel={() => setDialogOpen(false)}
-          />
+          <CreateServiceForm onCancel={() => setDialogOpen(false)} />
         </DialogContent>
       </Dialog>
     </div>

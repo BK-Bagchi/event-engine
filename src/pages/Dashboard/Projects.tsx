@@ -38,7 +38,7 @@ const Projects = () => {
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [dialogOpen, setDialogOpen] = useState(false);
 
-  const { projects, loadingProjects, refetchProjects } = useAllProjects();
+  const { projects, loadingProjects } = useAllProjects();
 
   const openPreview = (project: Project) => {
     setSelectedProject(project);
@@ -175,13 +175,7 @@ const Projects = () => {
             </DialogDescription>
           </DialogHeader>
 
-          <CreateProjectForm
-            fetchProjects={async () => {
-              await refetchProjects();
-            }}
-            setDialogOpen={setDialogOpen}
-            onCancel={() => setDialogOpen(false)}
-          />
+          <CreateProjectForm onCancel={() => setDialogOpen(false)} />
         </DialogContent>
       </Dialog>
     </div>

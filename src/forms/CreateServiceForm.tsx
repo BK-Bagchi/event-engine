@@ -1,5 +1,5 @@
 import { Controller, useForm } from "react-hook-form";
-import { useMutation } from "@tanstack/react-query";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { toast } from "sonner";
 import { Input } from "@/components/ui/input";
@@ -18,14 +18,11 @@ import { useAllProjects } from "@/hooks/queries/project";
 import Mandatory from "@/components/form/Mandatory";
 
 interface CreateServiceFormProps {
-  fetchServices: () => void;
   onCancel?: () => void;
 }
 
-export const CreateServiceForm = ({
-  fetchServices,
-  onCancel,
-}: CreateServiceFormProps) => {
+export const CreateServiceForm = ({ onCancel }: CreateServiceFormProps) => {
+  const queryClient = useQueryClient();
   const { projects, loadingProjects } = useAllProjects();
 
   const {
@@ -56,7 +53,7 @@ export const CreateServiceForm = ({
     },
     onSuccess: (res) => {
       toast.success(res.data.message, { position: "top-right" });
-      fetchServices();
+      queryClient.invalidateQueries({ queryKey: ["services"] });
       reset();
       onCancel?.();
     },
