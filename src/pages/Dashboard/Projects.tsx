@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { FolderOpen, Plus } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import { FolderOpen } from "lucide-react";
+import { CreateNewButton } from "@/components/button/CreateNewButton";
 //prettier-ignore
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 //prettier-ignore
@@ -38,13 +38,10 @@ const Projects = () => {
             Manage and monitor your event engine projects.
           </p>
         </div>
-        <Button
+        <CreateNewButton
           onClick={() => setDialogOpen(true)}
-          className="bg-brand-blue hover:bg-brand-hover-blue text-white font-semibold flex items-center gap-2"
-        >
-          <Plus size={16} />
-          Create New Project
-        </Button>
+          title="Create New Project"
+        />
       </div>
 
       {/* Grid */}

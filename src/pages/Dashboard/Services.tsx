@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { Plus, ServerCog } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import { ServerCog } from "lucide-react";
+import { CreateNewButton } from "@/components/button/CreateNewButton";
 //prettier-ignore
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 //prettier-ignore
@@ -37,13 +37,10 @@ const Services = () => {
             Manage email provider services across your projects.
           </p>
         </div>
-        <Button
+        <CreateNewButton
           onClick={() => setDialogOpen(true)}
-          className="bg-brand-blue hover:bg-brand-hover-blue text-white font-semibold flex items-center gap-2"
-        >
-          <Plus size={16} />
-          Create New Service
-        </Button>
+          title="Create New Service"
+        />
       </div>
 
       {/* Grid */}

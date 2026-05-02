@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from "react";
-import { Pencil, Plus, Save, Trash2 } from "lucide-react";
+import { Pencil, Save, Trash2 } from "lucide-react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import type { Template, TemplateVariable } from "@/types/template";
@@ -18,6 +18,7 @@ import { TemplateBodyEditor } from "@/components/templates/TemplateBodyEditor";
 import { AddVariableForm } from "@/forms/AddVariableForm";
 import { EditVariableForm } from "@/forms/EditVariableForm";
 import DeleteVariableAlert from "@/alerts/DeleteVariableAlert";
+import { CreateNewButton } from "@/components/button/CreateNewButton";
 
 interface BodyProps {
   template: Template | null;
@@ -172,15 +173,10 @@ const Body = ({ template, loadingTemplate }: BodyProps) => {
                   in templates to insert variable values.
                 </p>
               )}
-              <Button
-                size="sm"
-                variant="outline"
+              <CreateNewButton
                 onClick={() => setAddDialogOpen(true)}
-                className="border-none bg-brand-blue hover:bg-brand-hover-blue text-white hover:text-white font-semibold flex items-center gap-2"
-              >
-                <Plus size={13} />
-                Add Variable
-              </Button>
+                title="Add Variable"
+              />
             </div>
           </div>
           {template.variables?.length > 0 ? (

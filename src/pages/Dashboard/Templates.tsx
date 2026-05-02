@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { FileText, Plus } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import { FileText } from "lucide-react";
+import { CreateNewButton } from "@/components/button/CreateNewButton";
 //prettier-ignore
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 //prettier-ignore
@@ -46,13 +46,10 @@ const Templates = () => {
             Manage and monitor your email templates.
           </p>
         </div>
-        <Button
+        <CreateNewButton
           onClick={() => setDialogOpen(true)}
-          className="bg-brand-blue hover:bg-brand-hover-blue text-white font-semibold flex items-center gap-2"
-        >
-          <Plus size={16} />
-          Create New Template
-        </Button>
+          title="Create New Template"
+        />
       </div>
 
       {/* Grid */}
