@@ -19,9 +19,13 @@ import Mandatory from "@/components/form/Mandatory";
 
 interface CreateServiceFormProps {
   onCancel?: () => void;
+  projectId?: string;
 }
 
-export const CreateServiceForm = ({ onCancel }: CreateServiceFormProps) => {
+export const CreateServiceForm = ({
+  onCancel,
+  projectId,
+}: CreateServiceFormProps) => {
   const queryClient = useQueryClient();
   const { projects, loadingProjects } = useAllProjects();
 
@@ -34,7 +38,7 @@ export const CreateServiceForm = ({ onCancel }: CreateServiceFormProps) => {
   } = useForm<CreateServiceInput>({
     resolver: zodResolver(createServiceSchema),
     defaultValues: {
-      projectId: "",
+      projectId: projectId || "",
       name: "",
       providerType: undefined,
       isDefault: false,
@@ -91,7 +95,7 @@ export const CreateServiceForm = ({ onCancel }: CreateServiceFormProps) => {
             <Select
               onValueChange={field.onChange}
               value={field.value}
-              disabled={loadingProjects}
+              disabled={loadingProjects || !!projectId}
             >
               <SelectTrigger
                 id="service-project"

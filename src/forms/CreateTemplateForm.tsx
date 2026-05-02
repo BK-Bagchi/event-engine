@@ -28,9 +28,15 @@ const CATEGORY_LABELS: Record<string, string> = {
 
 interface CreateTemplateFormProps {
   onCancel?: () => void;
+  projectId?: string;
+  serviceId?: string;
 }
 
-export const CreateTemplateForm = ({ onCancel }: CreateTemplateFormProps) => {
+export const CreateTemplateForm = ({
+  onCancel,
+  projectId,
+  serviceId,
+}: CreateTemplateFormProps) => {
   const queryClient = useQueryClient();
 
   const {
@@ -42,8 +48,8 @@ export const CreateTemplateForm = ({ onCancel }: CreateTemplateFormProps) => {
   } = useForm<CreateTemplateInput>({
     resolver: zodResolver(createTemplateSchema),
     defaultValues: {
-      projectId: "",
-      serviceId: "",
+      projectId: projectId || "",
+      serviceId: serviceId || "",
       name: "",
       description: "",
       category: undefined,
@@ -115,7 +121,7 @@ export const CreateTemplateForm = ({ onCancel }: CreateTemplateFormProps) => {
             <Select
               onValueChange={field.onChange}
               value={field.value}
-              disabled={loadingProjects}
+              disabled={loadingProjects || !!projectId}
             >
               <SelectTrigger
                 id="template-project"
@@ -156,7 +162,7 @@ export const CreateTemplateForm = ({ onCancel }: CreateTemplateFormProps) => {
             <Select
               onValueChange={field.onChange}
               value={field.value}
-              disabled={loadingServices}
+              disabled={loadingServices || !!serviceId}
             >
               <SelectTrigger
                 id="template-service"
