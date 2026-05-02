@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import EmailStep from "@/components/auth/Email";
 import OTPStep from "@/components/auth/OTP";
 import ResetStep from "@/components/auth/Reset";
@@ -12,22 +12,28 @@ const ForgotPassword = ({
   setActiveTab: (tab: string) => void;
 }) => {
   const [step, setStep] = useState<Step>("email");
-  const [userId, setUserId] = useState<string>(""); // Store user ID for OTP verification and password reset
-  const [otpId, setOtpId] = useState<string>(""); // Store OTP ID for password reset
+  const [userId, setUserId] = useState<string>("");
+  const [otpId, setOtpId] = useState<string>("");
   const [email, setEmail] = useState("");
+  const [otpSentAt, setOtpSentAt] = useState<number | null>(null);
+
+  const otpSentAtValue = useMemo(() => otpSentAt ?? Date.now(), [otpSentAt]);
 
   return (
     <div className="w-full max-w-md p-6 shadow-lg">
-      {step === "email" && (
-        <EmailStep {...{ email, setEmail, setStep, setActiveTab, setUserId }} />
+      {step === "email" &&
+        //prettier-ignore
+        <EmailStep {...{ email, setEmail, setStep, setActiveTab, setUserId, setOtpSentAt }}
+        />}
+      {step === "otp" &&
+        //prettier-ignore
+        <OTPStep {...{ email, userId, setStep, setOtpId, otpSentAt: otpSentAtValue }}
+        />}
+
+      {step === "reset" && (
+        <ResetStep {...{ userId, otpId, setStep, otpSentAt: otpSentAtValue }} />
       )}
-
-      {step === "otp" && <OTPStep {...{ email, userId, setStep, setOtpId }} />}
-
-      {step === "reset" && <ResetStep {...{ userId, otpId, setStep }} />}
-
       {step === "success" && <SuccessStep {...{ step, setActiveTab }} />}
-
       {/* Progress Indicator */}
       <div className="my-6 flex items-center justify-between gap-2">
         <div

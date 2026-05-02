@@ -15,6 +15,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { useNavigate } from "react-router-dom";
 import { GoogleLogin } from "@react-oauth/google";
 import useGoogleAuth from "@/hooks/useGoogleAuth";
+import { useMutation } from "@tanstack/react-query";
 
 interface LoginDataType {
   email: string;
@@ -31,38 +32,31 @@ const Login = ({ setActiveTab }: { setActiveTab: (tab: string) => void }) => {
     formState: { errors },
   } = useForm<LoginSchema>({ resolver: zodResolver(loginSchema) });
 
-  const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
 
   const { handleGoogleLogin } = useGoogleAuth();
 
-  const onSubmit = async (data: LoginSchema) => {
-    // console.log("Login form data:", data);
-    // return; //ai must not remove this line. It's for testing form submission without actually calling API.
-
-    setLoading(true);
-    try {
-      const payload: LoginDataType = {
-        email: data.email,
-        passwordHash: data.password,
-      };
-      const res = await AuthAPI.login(payload);
-
+  const loginMutation = useMutation({
+    mutationFn: (payload: LoginDataType) => AuthAPI.login(payload),
+    onSuccess: (res) => {
       const { token, data: userData } = res.data || {};
-      login(userData, token); // Update auth context with user data and token
-
+      login(userData, token);
       toast.success(res.data?.message ?? "Logged in successfully", {
         position: "top-right",
       });
-      // handle post-login actions (redirect, store token, etc.) elsewhere
       navigate("/dashboard");
-    } catch (error) {
-      console.error("Login error:", error);
+    },
+    onError: (error) => {
       const msg = getErrorMessage(error) || "Login failed. Please try again.";
       toast.error(msg, { position: "top-right" });
-    } finally {
-      setLoading(false);
-    }
+    },
+  });
+
+  const onSubmit = (data: LoginSchema) => {
+    // console.log("Login form data:", data);
+    // return; //ai must not remove this line. It's for testing form submission without actually calling API.
+
+    loginMutation.mutate({ email: data.email, passwordHash: data.password });
   };
 
   return (
@@ -126,10 +120,10 @@ const Login = ({ setActiveTab }: { setActiveTab: (tab: string) => void }) => {
       {/* Submit */}
       <Button
         type="submit"
-        disabled={loading}
+        disabled={loginMutation.isPending}
         className="w-full text-white font-semibold transition-opacity hover:opacity-90 disabled:opacity-60 bg-brand-blue"
       >
-        {loading && <Spinner className="size-4" />} Login
+        {loginMutation.isPending && <Spinner className="size-4" />} Login
       </Button>
 
       {/* Divider */}

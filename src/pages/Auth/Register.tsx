@@ -13,6 +13,7 @@ import { getErrorMessage } from "@/utils/error";
 import { toast } from "sonner";
 import { GoogleLogin } from "@react-oauth/google";
 import useGoogleAuth from "@/hooks/useGoogleAuth";
+import { useMutation } from "@tanstack/react-query";
 
 interface RegisterDataType {
   fullName: string;
@@ -57,7 +58,6 @@ const Register = ({
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [avatarFile, setAvatarFile] = useState<File | null>(null);
   const [avatarPreview, setAvatarPreview] = useState<string | null>(null);
-  const [loading, setLoading] = useState(false);
 
   const { handleGoogleLogin } = useGoogleAuth();
 
@@ -73,17 +73,13 @@ const Register = ({
     }
   };
 
-  const onSubmit = async (data: RegisterSchema) => {
-    // console.log("Register form data:", data);
-    // return; //ai must not remove this line. It's for testing form submission without actually calling API.
+  const registerMutation = useMutation({
+    mutationFn: async (data: RegisterSchema) => {
+      // console.log("Register form data:", data);
+      // return; //ai must not remove this line. It's for testing form submission without actually calling API.
 
-    try {
-      setLoading(true);
-
-      // upload avatar first (if selected) and get URL
       let avatarUrl: string | undefined;
       if (avatarFile) avatarUrl = await uploadToImgbb(avatarFile);
-      // if avatar already a URL in form data
       else if (data.avatar && typeof data.avatar === "string")
         avatarUrl = data.avatar;
 
@@ -93,24 +89,28 @@ const Register = ({
         passwordHash: data.password,
         avatar: avatarUrl,
       };
-      const res = await AuthAPI.register(payload);
-      // console.log("Register response:", res);
+      return AuthAPI.register(payload);
+    },
+    onSuccess: (res) => {
       toast.success(
         res.data?.message ?? "Registration successful! Please log in.",
-        {
-          position: "top-right",
-        },
+        { position: "top-right" },
       );
       setActiveTab("login");
-    } catch (error) {
-      console.error("Registration error:", error);
+    },
+    onError: (error) => {
       const msg =
         getErrorMessage(error) || "Registration failed. Please try again.";
       toast.error(msg, { position: "top-right" });
-    } finally {
-      reset();
-      setLoading(false);
-    }
+    },
+    onSettled: () => reset(),
+  });
+
+  const onSubmit = (data: RegisterSchema) => {
+    // console.log("Register form data:", data);
+    // return; //ai must not remove this line. It's for testing form submission without actually calling API.
+
+    registerMutation.mutate(data);
   };
 
   return (
@@ -254,10 +254,11 @@ const Register = ({
       {/* Submit */}
       <Button
         type="submit"
-        disabled={loading}
+        disabled={registerMutation.isPending}
         className="w-full text-white font-semibold transition-opacity hover:opacity-90 disabled:opacity-60 bg-brand-orange"
       >
-        {loading && <Spinner className="size-4" />} Create Account
+        {registerMutation.isPending && <Spinner className="size-4" />} Create
+        Account
       </Button>
 
       {/* Divider */}

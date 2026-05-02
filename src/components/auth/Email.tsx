@@ -1,4 +1,3 @@
-import { useState } from "react";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
@@ -10,6 +9,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { sendOtpSchema, type SendOTPType } from "@/validation/auth";
 import { getErrorMessage } from "@/utils/error";
 import FormError from "@/components/form/FormError";
+import { useMutation } from "@tanstack/react-query";
 
 type Step = "email" | "otp" | "reset" | "success";
 type Props = {
@@ -18,6 +18,7 @@ type Props = {
   setStep: (s: Step) => void;
   setActiveTab: (tab: string) => void;
   setUserId: (id: string) => void;
+  setOtpSentAt: (t: number) => void;
 };
 
 export default function EmailStep({
@@ -26,9 +27,8 @@ export default function EmailStep({
   setStep,
   setActiveTab,
   setUserId,
+  setOtpSentAt,
 }: Props) {
-  const [loading, setLoading] = useState(false);
-
   const {
     register,
     handleSubmit,
@@ -39,29 +39,30 @@ export default function EmailStep({
     defaultValues: { email },
   });
 
-  const onSubmit = async (data: SendOTPType) => {
-    console.log("EmailStep form data:", data);
-    // return; //ai must not remove this line. It's for testing form submission without actually calling API.
-
-    setLoading(true);
-    try {
-      const res = await AuthAPI.sendPasswordResetOTP(data);
-      console.log("sendPasswordResetOTP response:", res);
+  const sendOtpMutation = useMutation({
+    mutationFn: (data: SendOTPType) => AuthAPI.sendPasswordResetOTP(data),
+    onSuccess: (res, data) => {
       setEmail(data.email);
       toast.success(res.data?.message ?? "OTP sent successfully", {
         position: "top-right",
       });
-      setUserId(res.data.data.userId ?? ""); // Store user ID for later steps
+      setUserId(res.data.data.userId ?? "");
+      setOtpSentAt(Date.now());
       setStep("otp");
-    } catch (error) {
-      console.error("Send OTP error:", error);
+    },
+    onError: (error) => {
       const msg =
         getErrorMessage(error) || "Failed to send OTP. Please try again.";
       toast.error(msg, { position: "top-right" });
-    } finally {
-      setLoading(false);
-      reset();
-    }
+    },
+    onSettled: () => reset(),
+  });
+
+  const onSubmit = (data: SendOTPType) => {
+    // console.log("EmailStep form data:", data);
+    // return; //ai must not remove this line. It's for testing form submission without actually calling API.
+
+    sendOtpMutation.mutate(data);
   };
 
   return (
@@ -91,10 +92,16 @@ export default function EmailStep({
 
       <Button
         type="submit"
-        disabled={loading}
+        disabled={sendOtpMutation.isPending}
         className="w-full text-white font-semibold disabled:opacity-60 bg-brand-blue"
       >
-        {loading ? <Spinner className="size-4" /> : "Send Reset Code"}
+        {sendOtpMutation.isPending ? (
+          <>
+            <Spinner className="size-4" /> Sending Reset Code...{" "}
+          </>
+        ) : (
+          "Send Reset Code"
+        )}
       </Button>
 
       <button

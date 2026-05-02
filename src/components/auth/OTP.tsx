@@ -1,4 +1,5 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { useMutation } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { Spinner } from "@/components/ui/spinner";
 //prettier-ignore
@@ -10,17 +11,26 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { verifyOtpSchema, type VerifyOTPType } from "@/validation/auth";
 import FormError from "@/components/form/FormError";
+import Timer from "@/components/others/Timer";
+
+const TIMER_DURATION = 10 * 60; // 600 seconds
 
 type Step = "email" | "otp" | "reset" | "success";
 type Props = {
   email: string;
   userId: string;
+  otpSentAt: number;
   setStep: (s: Step) => void;
   setOtpId: (id: string) => void;
 };
 
-export default function OTPStep({ email, userId, setStep, setOtpId }: Props) {
-  const [loading, setLoading] = useState(false);
+export default function OTPStep({
+  email,
+  userId,
+  otpSentAt,
+  setStep,
+  setOtpId,
+}: Props) {
   const [otp, setOtp] = useState("");
 
   const {
@@ -33,34 +43,56 @@ export default function OTPStep({ email, userId, setStep, setOtpId }: Props) {
     defaultValues: { otp: "", userId },
   });
 
+  // ── Countdown timer ─────────────────────────────────────────
+  const [secondsLeft, setSecondsLeft] = useState(() => {
+    const elapsed = Math.floor((Date.now() - otpSentAt) / 1000);
+    return Math.max(0, TIMER_DURATION - elapsed);
+  });
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setSecondsLeft((prev) => {
+        if (prev <= 0) return 0;
+        return prev - 1;
+      });
+    }, 1000);
+    return () => clearInterval(interval);
+  }, []);
+
+  const isExpired = secondsLeft <= 0;
+  const timerMins = Math.floor(secondsLeft / 60)
+    .toString()
+    .padStart(2, "0");
+  const timerSecs = (secondsLeft % 60).toString().padStart(2, "0");
+
   // Keep form otp in sync with InputOTP changes
   const handleOtpChange = (val: string) => {
     setOtp(val);
     setValue("otp", val);
   };
 
-  const onSubmit = async (data: VerifyOTPType) => {
-    console.log("OTPStep form data:", data);
-    // return; //ai must not remove this line. It's for testing form submission without actually calling API.
-
-    setLoading(true);
-    try {
-      const res = await AuthAPI.verifyPasswordResetOTP(data);
-      console.log("verifyPasswordResetOTP response:", res);
+  const verifyOtpMutation = useMutation({
+    mutationFn: (data: VerifyOTPType) => AuthAPI.verifyPasswordResetOTP(data),
+    onSuccess: (res) => {
       toast.success(res.data?.message ?? "OTP verified successfully", {
         position: "top-right",
       });
-      setOtpId(res.data?.data?.otpId ?? ""); // Store OTP ID for later steps
+      setOtpId(res.data?.data?.otpId ?? "");
       setStep("reset");
-    } catch (error) {
-      console.error("Verify OTP error:", error);
+    },
+    onError: (error) => {
       const msg =
         getErrorMessage(error) || "Failed to verify OTP. Please try again.";
       toast.error(msg, { position: "top-right" });
-    } finally {
-      setLoading(false);
-      reset();
-    }
+    },
+    onSettled: () => reset(),
+  });
+
+  const onSubmit = (data: VerifyOTPType) => {
+    // console.log("OTPStep form data:", data);
+    // return; //ai must not remove this line. It's for testing form submission without actually calling API.
+
+    verifyOtpMutation.mutate(data);
   };
 
   return (
@@ -94,12 +126,21 @@ export default function OTPStep({ email, userId, setStep, setOtpId }: Props) {
         <FormError message={errors.otp?.message} />
       </div>
 
+      {/* Timer */}
+      {/* prettier-ignore */}
+      <Timer {...{isExpired, secondsLeft, timerMins, timerSecs, setStep}} />
+
       <Button
         type="submit"
-        disabled={loading || otp.length !== 4}
+        disabled={verifyOtpMutation.isPending || otp.length !== 4 || isExpired}
         className="w-full text-white font-semibold disabled:opacity-60 bg-brand-blue"
       >
-        {loading ? <Spinner className="size-4" /> : "Verify Code"}
+        {verifyOtpMutation.isPending && (
+          <>
+            <Spinner className="size-4" /> Verifying...
+          </>
+        )}{" "}
+        Verify Code
       </Button>
 
       <button

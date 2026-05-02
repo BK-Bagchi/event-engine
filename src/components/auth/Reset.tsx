@@ -1,4 +1,5 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { useMutation } from "@tanstack/react-query";
 import { EyeIcon, EyeOffIcon } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -11,18 +12,26 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { resetPasswordSchema, type ResetPasswordType } from "@/validation/auth";
 import FormError from "@/components/form/FormError";
+import Timer from "@/components/others/Timer";
+
+const TIMER_DURATION = 10 * 60; // 600 seconds
 
 type Step = "email" | "otp" | "reset" | "success";
 type Props = {
   userId: string;
   otpId: string;
+  otpSentAt: number;
   setStep: (s: Step) => void;
 };
 
-export default function ResetStep({ userId, otpId, setStep }: Props) {
+export default function ResetStep({
+  userId,
+  otpId,
+  otpSentAt,
+  setStep,
+}: Props) {
   const [showNew, setShowNew] = useState(false);
   const [showConfirm, setShowConfirm] = useState(false);
-  const [loading, setLoading] = useState(false);
 
   const {
     register,
@@ -39,32 +48,54 @@ export default function ResetStep({ userId, otpId, setStep }: Props) {
     },
   });
 
-  const onSubmit = async (data: ResetPasswordType) => {
-    console.log("ResetStep form data:", data);
-    // return; //ai must not remove this line. It's for testing form submission without actually calling API.
+  // ── Countdown timer ─────────────────────────────────────────
+  const [secondsLeft, setSecondsLeft] = useState(() => {
+    const elapsed = Math.floor((Date.now() - otpSentAt) / 1000);
+    return Math.max(0, TIMER_DURATION - elapsed);
+  });
 
-    setLoading(true);
-    try {
-      const payload = {
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setSecondsLeft((prev) => {
+        if (prev <= 0) return 0;
+        return prev - 1;
+      });
+    }, 1000);
+    return () => clearInterval(interval);
+  }, []);
+
+  const isExpired = secondsLeft <= 0;
+  const timerMins = Math.floor(secondsLeft / 60)
+    .toString()
+    .padStart(2, "0");
+  const timerSecs = (secondsLeft % 60).toString().padStart(2, "0");
+
+  const resetPasswordMutation = useMutation({
+    mutationFn: (data: ResetPasswordType) =>
+      AuthAPI.resetPassword({
         userId: data.userId,
         otpId: data.otpId,
         newPassword: data.newPassword,
-      };
-      const res = await AuthAPI.resetPassword(payload);
-      console.log("resetPassword response:", res);
+      }),
+    onSuccess: (res) => {
       toast.success(res.data?.message ?? "Password reset successfully", {
         position: "top-right",
       });
       setStep("success");
-    } catch (error) {
-      console.error("Reset password error:", error);
+    },
+    onError: (error) => {
       const msg =
         getErrorMessage(error) || "Failed to reset password. Please try again.";
       toast.error(msg, { position: "top-right" });
-    } finally {
-      setLoading(false);
-      reset();
-    }
+    },
+    onSettled: () => reset(),
+  });
+
+  const onSubmit = (data: ResetPasswordType) => {
+    // console.log("ResetStep form data:", data);
+    // return; //ai must not remove this line. It's for testing form submission without actually calling API.
+
+    resetPasswordMutation.mutate(data);
   };
 
   return (
@@ -117,12 +148,21 @@ export default function ResetStep({ userId, otpId, setStep }: Props) {
         <FormError message={errors.confirmPassword?.message} />
       </div>
 
+      {/* Timer */}
+      {/* prettier-ignore */}
+      <Timer {...{isExpired, secondsLeft, timerMins, timerSecs, setStep}} />
+
       <Button
         type="submit"
-        disabled={loading}
+        disabled={resetPasswordMutation.isPending || isExpired}
         className="w-full text-white font-semibold disabled:opacity-60 bg-brand-blue"
       >
-        {loading ? <Spinner className="size-4" /> : "Reset Password"}
+        {resetPasswordMutation.isPending && (
+          <>
+            <Spinner className="size-4" /> Setting New Password...
+          </>
+        )}{" "}
+        Reset Password
       </Button>
 
       <button
