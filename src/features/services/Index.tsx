@@ -1,10 +1,8 @@
 import { useParams } from "react-router-dom";
-import { AlertCircle } from "lucide-react";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import Service from "@/features/services/Service";
 import Templates from "@/features/services/Templates";
-//prettier-ignore
-import { Empty, EmptyHeader, EmptyMedia, EmptyTitle, EmptyDescription } from "@/components/ui/empty";
+import IndexEmpty from "@/components/empty/IndexEmpty";
 
 const Index = () => {
   const { projectId, serviceId } = useParams<{
@@ -15,20 +13,10 @@ const Index = () => {
   //   empty state
   if (!projectId || !serviceId) {
     return (
-      <Empty className="col-span-3 border-[#2A3550] bg-[#1A2235]/50">
-        <EmptyHeader>
-          <EmptyMedia variant="icon">
-            <AlertCircle className="text-zinc-600" />
-          </EmptyMedia>
-          <EmptyTitle className="text-zinc-400">
-            Project or Service not found
-          </EmptyTitle>
-          <EmptyDescription className="text-zinc-600">
-            The project ID or service ID is missing or invalid. Please check the
-            URL and try again.
-          </EmptyDescription>
-        </EmptyHeader>
-      </Empty>
+      <IndexEmpty
+        emptyTitle="Project or Service not found"
+        emptyDescription="The project ID or service ID is missing or invalid. Please check the URL and try again."
+      />
     );
   }
 

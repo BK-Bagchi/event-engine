@@ -1,7 +1,6 @@
 import { useState } from "react";
 import { Pencil, Calendar, Hash } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Skeleton } from "@/components/ui/skeleton";
 //prettier-ignore
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { EditProjectForm } from "@/forms/EditProjectForm";
@@ -12,6 +11,7 @@ import SettingsSection from "@/components/projects/SettingsSection";
 import UsageStatsSection from "@/components/projects/UsageStatsSection";
 import BackButton from "@/components/button/BackButton";
 import { useProject } from "@/hooks/queries/project";
+import ProjectSkeleton from "@/components/skeleton/ProjectSkeleton";
 
 const Project = ({ projectId: id }: { projectId: string }) => {
   const [editDialogOpen, setEditDialogOpen] = useState(false);
@@ -19,16 +19,7 @@ const Project = ({ projectId: id }: { projectId: string }) => {
   const { project, loadingProject } = useProject({ projectId: id });
 
   // ── Loading skeleton ───────────────────────────────────────
-  if (loadingProject) {
-    return (
-      <div className="min-h-screen bg-[#0B1120] py-6 flex flex-col gap-6 max-w-6xl mx-auto">
-        <Skeleton className="h-8 w-32 bg-[#2A3550]/60" />
-        {Array.from({ length: 6 }).map((_, i) => (
-          <Skeleton key={i} className="h-28 w-full bg-[#2A3550]/60" />
-        ))}
-      </div>
-    );
-  }
+  if (loadingProject) return <ProjectSkeleton />;
 
   if (!project) {
     return (

@@ -3,11 +3,7 @@ import ServiceInfoSection from "@/components/services/ServiceInfoSection";
 import StatusSection from "@/components/services/StatusSection";
 import BackButton from "@/components/button/BackButton";
 import { useService } from "@/hooks/queries/service";
-
-// ── Skeleton placeholder ──────────────────────────────────────
-const Skeleton = ({ className }: { className?: string }) => (
-  <div className={`animate-pulse rounded-md bg-[#2A3550]/60 ${className}`} />
-);
+import ServiceSkeleton from "@/components/skeleton/ServiceSkeleton";
 
 const ServiceDetail = ({
   projectId,
@@ -19,16 +15,7 @@ const ServiceDetail = ({
   const { service, loadingService } = useService({ projectId, serviceId });
 
   // ── Loading skeleton ───────────────────────────────────────
-  if (loadingService) {
-    return (
-      <div className="min-h-screen bg-[#0B1120] py-6 flex flex-col gap-6 max-w-6xl mx-auto">
-        <Skeleton className="h-8 w-32" />
-        <Skeleton className="h-28 w-full" />
-        <Skeleton className="h-40 w-full" />
-        <Skeleton className="h-24 w-full" />
-      </div>
-    );
-  }
+  if (loadingService) return <ServiceSkeleton />;
 
   if (!service) {
     return (

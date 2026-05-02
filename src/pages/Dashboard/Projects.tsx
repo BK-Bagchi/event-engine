@@ -1,17 +1,15 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { FolderOpen } from "lucide-react";
 import { CreateNewButton } from "@/components/button/CreateNewButton";
 //prettier-ignore
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
-//prettier-ignore
-import { Empty, EmptyHeader, EmptyMedia, EmptyTitle, EmptyDescription } from "@/components/ui/empty";
 import { CreateProjectForm } from "@/forms/CreateProjectForm";
 import ProjectPreviewDrawer from "@/components/drawer/ProjectPreview";
 import type { Project } from "@/types/project";
-import CardSkeleton from "@/components/skeleton/CardSkeleton";
 import { useAllProjects } from "@/hooks/queries/project";
 import ProjectCard from "@/components/projects/ProjectCard";
+import ProjectsEmpty from "@/components/empty/ProjectsEmpty";
+import ProjectsSkeleton from "@/components/skeleton/ProjectsSkeleton";
 
 // ── Main component ────────────────────────────────────────────
 const Projects = () => {
@@ -49,29 +47,9 @@ const Projects = () => {
       <div className="flex flex-col gap-6">
         {/* Grid */}
         {loadingProjects ? (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-            {Array.from({ length: 3 }).map((_, i) => (
-              <CardSkeleton key={i} />
-            ))}
-          </div>
+          <ProjectsSkeleton />
         ) : projects.length === 0 ? (
-          <Empty className="border border-dashed border-[#2A3550] bg-[#1A2235]/50 min-h-85">
-            <EmptyHeader>
-              <EmptyMedia
-                variant="icon"
-                className="size-12 bg-[#2A3550] rounded-xl"
-              >
-                <FolderOpen size={22} className="text-zinc-400" />
-              </EmptyMedia>
-              <EmptyTitle className="text-zinc-200 text-base">
-                No projects yet
-              </EmptyTitle>
-              <EmptyDescription className="text-zinc-500">
-                You haven't created any projects. Get started by creating your
-                first project.
-              </EmptyDescription>
-            </EmptyHeader>
-          </Empty>
+          <ProjectsEmpty />
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
             {projects.map((project) => (

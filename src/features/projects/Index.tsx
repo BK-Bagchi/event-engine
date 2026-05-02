@@ -1,31 +1,20 @@
 import { useParams } from "react-router-dom";
-import { AlertCircle } from "lucide-react";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import Project from "@/features/projects/Project";
 import Services from "@/features/projects/Services";
 import Templates from "@/features/projects/Templates";
-//prettier-ignore
-import { Empty, EmptyHeader, EmptyMedia, EmptyTitle, EmptyDescription } from "@/components/ui/empty";
+import IndexEmpty from "@/components/empty/IndexEmpty";
 
 const Index = () => {
   const { id } = useParams<{ id: string }>();
   //   empty state
-  if (!id) {
+  if (!id)
     return (
-      <Empty className="col-span-3 border-[#2A3550] bg-[#1A2235]/50">
-        <EmptyHeader>
-          <EmptyMedia variant="icon">
-            <AlertCircle className="text-zinc-600" />
-          </EmptyMedia>
-          <EmptyTitle className="text-zinc-400">Project not found</EmptyTitle>
-          <EmptyDescription className="text-zinc-600">
-            The project ID is missing or invalid. Please check the URL and try
-            again.
-          </EmptyDescription>
-        </EmptyHeader>
-      </Empty>
+      <IndexEmpty
+        emptyTitle="Project not found"
+        emptyDescription="The project ID is missing or invalid. Please check the URL and try again."
+      />
     );
-  }
 
   return (
     <div className="min-h-screen flex items-start justify-center py-10 px-4">

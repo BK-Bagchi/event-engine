@@ -1,6 +1,5 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
-import { Skeleton } from "@/components/ui/skeleton";
 import { Spinner } from "@/components/ui/spinner";
 import BackButton from "@/components/button/BackButton";
 //prettier-ignore
@@ -9,6 +8,7 @@ import type { Template, TemplateCategory, TemplateStatus } from "@/types/templat
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { TemplateAPI } from "@/api";
 import { getErrorMessage } from "@/utils/error";
+import InformationSkeleton from "@/components/skeleton/InformationSkeleton";
 
 interface InformationProps {
   template: Template | null;
@@ -28,28 +28,6 @@ const STATUS_OPTIONS: { value: TemplateStatus; label: string }[] = [
   { value: "DRAFT", label: "Draft" },
   { value: "ARCHIVED", label: "Archived" },
 ];
-
-const InformationSkeleton = () => (
-  <div className="max-w-6xl mx-auto flex flex-col gap-6">
-    <Skeleton className="h-5 w-36 bg-[#2A3550]/60" />
-    {/* Section 1 skeleton */}
-    <section className="rounded-xl border border-[#2A3550] bg-[#1A2235] p-6">
-      <Skeleton className="h-6 w-48 mb-3 bg-[#2A3550]/60" />
-      <Skeleton className="h-4 w-full bg-[#2A3550]/60" />
-      <Skeleton className="h-4 w-2/3 mt-2 bg-[#2A3550]/60" />
-    </section>
-    {/* Section 2 skeleton */}
-    <section className="rounded-xl border border-[#2A3550] bg-[#1A2235] p-6">
-      <Skeleton className="h-4 w-20 mb-3 bg-[#2A3550]/60" />
-      <Skeleton className="h-8 w-44 bg-[#2A3550]/60" />
-    </section>
-    {/* Section 3 skeleton */}
-    <section className="rounded-xl border border-[#2A3550] bg-[#1A2235] p-6">
-      <Skeleton className="h-4 w-16 mb-3 bg-[#2A3550]/60" />
-      <Skeleton className="h-8 w-44 bg-[#2A3550]/60" />
-    </section>
-  </div>
-);
 
 const Information = ({ template, loadingTemplate }: InformationProps) => {
   const queryClient = useQueryClient();

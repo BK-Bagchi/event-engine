@@ -1,17 +1,15 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { ServerCog } from "lucide-react";
 import { CreateNewButton } from "@/components/button/CreateNewButton";
 //prettier-ignore
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
-//prettier-ignore
-import { Empty, EmptyHeader, EmptyMedia, EmptyTitle, EmptyDescription } from "@/components/ui/empty";
 import ProjectPreviewDrawer from "@/components/drawer/ProjectPreview";
 import type { Project } from "@/types/project";
 import { CreateServiceForm } from "@/forms/CreateServiceForm";
-import CardSkeleton from "@/components/skeleton/CardSkeleton";
 import { useAllServices } from "@/hooks/queries/service";
 import ServiceCard from "@/components/services/ServiceCard";
+import ServicesEmpty from "@/components/empty/ServicesEmpty";
+import ServicesSkeleton from "@/components/skeleton/ServicesSkeleton";
 
 // ── Main component ────────────────────────────────────────────
 const Services = () => {
@@ -45,29 +43,9 @@ const Services = () => {
 
       {/* Grid */}
       {loadingServices ? (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-          {Array.from({ length: 3 }).map((_, i) => (
-            <CardSkeleton key={i} />
-          ))}
-        </div>
+        <ServicesSkeleton />
       ) : services.length === 0 ? (
-        <Empty className="border border-dashed border-[#2A3550] bg-[#1A2235]/50 min-h-85">
-          <EmptyHeader>
-            <EmptyMedia
-              variant="icon"
-              className="size-12 bg-[#2A3550] rounded-xl"
-            >
-              <ServerCog size={22} className="text-zinc-400" />
-            </EmptyMedia>
-            <EmptyTitle className="text-zinc-200 text-base">
-              No services yet
-            </EmptyTitle>
-            <EmptyDescription className="text-zinc-500">
-              You haven't configured any email services. Create one to start
-              sending emails.
-            </EmptyDescription>
-          </EmptyHeader>
-        </Empty>
+        <ServicesEmpty />
       ) : (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
           {services.map((service) => (

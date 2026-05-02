@@ -4,30 +4,13 @@ import { toast } from "sonner";
 import { useTemplateWorkflows } from "@/hooks/queries/workflow";
 import { WorkflowAPI } from "@/api";
 import { Button } from "@/components/ui/button";
-import { Skeleton } from "@/components/ui/skeleton";
 import { Spinner } from "@/components/ui/spinner";
-//prettier-ignore
-import { Empty, EmptyHeader, EmptyMedia, EmptyTitle, EmptyDescription } from "@/components/ui/empty";
 //prettier-ignore
 import WorkflowEditor, { type WorkflowData} from "@/components/workflows/WorkflowEditor";
 import { getErrorMessage } from "@/utils/error";
 import type { Template } from "@/types/template";
-
-// ── Loading skeleton ──────────────────────────────────────────
-const WorkflowSkeleton = () => (
-  <div className="rounded-lg border border-[#2A3550] bg-[#1A2235] p-5 flex flex-col gap-5">
-    <div className="flex items-center gap-3">
-      <Skeleton className="h-4 w-14 bg-[#2A3550] rounded" />
-      <Skeleton className="h-8 w-36 bg-[#2A3550] rounded-lg" />
-    </div>
-    <div className="flex flex-col gap-3">
-      <Skeleton className="h-4 w-16 bg-[#2A3550] rounded" />
-      <Skeleton className="h-10 w-full bg-[#2A3550] rounded-md" />
-      <Skeleton className="h-10 w-full bg-[#2A3550] rounded-md" />
-      <Skeleton className="h-7 w-24 bg-[#2A3550] rounded-md" />
-    </div>
-  </div>
-);
+import WorkflowSkeleton from "@/components/skeleton/WorkflowSkeleton";
+import IndexEmpty from "@/components/empty/IndexEmpty";
 
 // ── Main component ────────────────────────────────────────────
 interface WorkflowProps {
@@ -85,22 +68,11 @@ const Workflow = ({ template, loadingTemplate }: WorkflowProps) => {
             Create Workflow
           </Button>
         </div>
-        <Empty className="border border-dashed border-[#2A3550] bg-[#1A2235]/50 min-h-85">
-          <EmptyHeader>
-            <EmptyMedia
-              variant="icon"
-              className="size-12 bg-[#2A3550] rounded-xl"
-            >
-              <GitBranch size={22} className="text-zinc-400" />
-            </EmptyMedia>
-            <EmptyTitle className="text-zinc-200 text-base">
-              No workflow yet
-            </EmptyTitle>
-            <EmptyDescription className="text-zinc-500">
-              Create a workflow to define automated actions for this template.
-            </EmptyDescription>
-          </EmptyHeader>
-        </Empty>
+        <IndexEmpty
+          Icon={GitBranch}
+          emptyTitle="No workflow yet"
+          emptyDescription="Create a workflow to define automated actions for this template."
+        />
       </div>
     );
   }
