@@ -156,7 +156,7 @@ export const EditServiceForm = ({
       </div>
 
       {/* Actions */}
-      <div className="flex items-center gap-3 pt-1 border-t border-[#2A3550]">
+      <div className="flex items-center gap-3 pt-4 border-t border-[#2A3550]">
         <Button
           type="submit"
           disabled={mutation.isPending}
@@ -169,7 +169,7 @@ export const EditServiceForm = ({
           type="button"
           variant="outline"
           onClick={onCancel}
-          className="flex-1 border-[#2A3550] text-zinc-800"
+          className="flex-1 border-[#2A3550] text-zinc-800 hover:bg-[#2A3550] hover:text-white"
         >
           Cancel
         </Button>

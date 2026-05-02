@@ -123,6 +123,7 @@ const Config = ({ template, loadingTemplate }: ConfigProps) => {
           <DeliveryConfigForm
             template={template}
             onSuccess={() => setDeliveryDialogOpen(false)}
+            onCancel={() => setDeliveryDialogOpen(false)}
           />
         </DialogContent>
       </Dialog>

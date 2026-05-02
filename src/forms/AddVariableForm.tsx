@@ -294,22 +294,22 @@ export const AddVariableForm = ({
       </section>
 
       {/* Actions */}
-      <div className="flex justify-end gap-3 pt-2">
+      <div className="flex items-center gap-3 pt-4 border-t border-[#2A3550]">
+        <Button
+          type="submit"
+          disabled={mutation.isPending}
+          className="flex-1 bg-brand-blue hover:bg-brand-hover-blue text-white gap-2"
+        >
+          {mutation.isPending && <Spinner className="size-3.5" />}
+          Add Variable
+        </Button>
         <Button
           type="button"
           variant="outline"
           onClick={onClose}
-          className="border-[#2A3550] text-zinc-800 hover:bg-[#2A3550] hover:text-white"
+          className="flex-1 border-[#2A3550] text-zinc-800 hover:bg-[#2A3550] hover:text-white"
         >
           Cancel
-        </Button>
-        <Button
-          type="submit"
-          disabled={mutation.isPending}
-          className="bg-brand-blue hover:bg-brand-hover-blue text-white gap-2"
-        >
-          {mutation.isPending && <Spinner className="size-3.5" />}
-          Add Variable
         </Button>
       </div>
     </form>

@@ -251,26 +251,26 @@ export const CreateTemplateForm = ({ onCancel }: CreateTemplateFormProps) => {
       </div>
 
       {/* Actions */}
-      <div className="flex justify-end gap-2 pt-1">
+      <div className="flex items-center gap-3 pt-4 border-t border-[#2A3550]">
+        <Button
+          type="submit"
+          disabled={isLoadingData || mutation.isPending}
+          className="flex-1 bg-brand-blue hover:bg-brand-hover-blue text-white font-semibold disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+        >
+          {mutation.isPending && <Spinner className="size-3.5" />}
+          Create Template
+        </Button>
         {onCancel && (
           <Button
             type="button"
             variant="outline"
             onClick={onCancel}
             disabled={isLoadingData || mutation.isPending}
-            className="border-[#2A3550] text-zinc-300 hover:bg-[#2A3550] hover:text-white bg-transparent disabled:opacity-50 disabled:cursor-not-allowed"
+            className="flex-1 border-[#2A3550] text-zinc-800 hover:bg-[#2A3550] hover:text-white disabled:opacity-50 disabled:cursor-not-allowed"
           >
             Cancel
           </Button>
         )}
-        <Button
-          type="submit"
-          disabled={isLoadingData || mutation.isPending}
-          className="bg-brand-blue hover:bg-brand-hover-blue text-white font-semibold disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
-        >
-          {mutation.isPending && <Spinner className="size-3.5" />}
-          Create Template
-        </Button>
       </div>
     </form>
   );

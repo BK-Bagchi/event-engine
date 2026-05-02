@@ -20,11 +20,13 @@ import type { Template } from "@/types/template";
 interface DeliveryConfigFormProps {
   template: Template;
   onSuccess: () => void;
+  onCancel: () => void;
 }
 
 export const DeliveryConfigForm = ({
   template,
   onSuccess,
+  onCancel,
 }: DeliveryConfigFormProps) => {
   const queryClient = useQueryClient();
 
@@ -234,14 +236,22 @@ export const DeliveryConfigForm = ({
         </button>
       </div>
 
-      <div className="flex justify-end gap-2 pt-2">
+      <div className="flex items-center gap-3 pt-4 border-t border-[#2A3550]">
         <Button
           type="submit"
           disabled={mutation.isPending}
-          className="bg-brand-blue hover:bg-brand-blue/90 text-white gap-2"
+          className="flex-1 bg-brand-blue hover:bg-brand-blue/90 text-white gap-2"
         >
           {mutation.isPending && <Spinner className="size-4" />}
-          Save
+          Save Changes
+        </Button>
+        <Button
+          type="button"
+          variant="outline"
+          onClick={onCancel}
+          className="flex-1 border-[#2A3550] text-zinc-800 hover:bg-[#2A3550] hover:text-white"
+        >
+          Cancel
         </Button>
       </div>
     </form>

@@ -317,7 +317,7 @@ export const CreateProjectForm = ({ onCancel }: CreateProjectFormProps) => {
           type="button"
           variant="outline"
           onClick={onCancel}
-          className="flex-1 border-[#2A3550] text-zinc-900 hover:bg-[#2A3550]"
+          className="flex-1 border-[#2A3550] text-zinc-900 hover:bg-[#2A3550] hover:text-white"
         >
           Cancel
         </Button>
